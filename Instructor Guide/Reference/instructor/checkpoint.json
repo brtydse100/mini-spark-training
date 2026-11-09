@@ -1,0 +1,23 @@
+{
+  "op": "and",
+  "args": [
+    {
+      "op": "ge",
+      "args": [
+        {
+          "column": "age"
+        },
+        18
+      ]
+    },
+    {
+      "op": "lt",
+      "args": [
+        {
+          "column": "age"
+        },
+        30
+      ]
+    }
+  ]
+}

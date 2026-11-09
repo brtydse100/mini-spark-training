@@ -1,0 +1,42 @@
+{
+  "table": "people",
+  "sheet": "data",
+  "version": 1,
+  "columns": [
+    {
+      "name": "id",
+      "type": "integer",
+      "nullable": false
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "nullable": false
+    },
+    {
+      "name": "age",
+      "type": "integer",
+      "nullable": true
+    },
+    {
+      "name": "salary",
+      "type": "decimal",
+      "nullable": false
+    },
+    {
+      "name": "country",
+      "type": "string",
+      "nullable": false
+    },
+    {
+      "name": "active",
+      "type": "boolean",
+      "nullable": false
+    },
+    {
+      "name": "note",
+      "type": "string",
+      "nullable": true
+    }
+  ]
+}

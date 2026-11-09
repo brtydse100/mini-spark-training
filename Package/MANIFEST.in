@@ -1,0 +1,11 @@
+include README.md CONTRIBUTING.md
+prune instructor
+prune checks
+prune docs
+prune course
+prune tools
+prune trainee
+prune data
+prune reports
+exclude EXERCISE_PLAN.md AUTHORING.md
+global-exclude *.pyc

@@ -1,0 +1,17 @@
+# Local Python environments and generated files
+.venv/
+.wheel-check/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+reports/
+.env
+.env.*
+!.env.example
+
+# Keep the small shared sample tables; regenerate larger workloads locally.
+/Package/data/*
+!/Package/data/samples/
