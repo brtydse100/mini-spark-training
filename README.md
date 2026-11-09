@@ -1,45 +1,36 @@
 # Mini Spark Training
 
 A two-week local Python exercise for developers familiar with OOP and SOLID.
-Trainees build an Excel query engine on a deliberately flawed generic process
-execution skeleton, then extend it with partitioning and lazy evaluation.
+Trainees build an Excel query engine using Workframe, then extend their engine
+with partitioning and lazy evaluation while investigating dependency behavior.
 
-## Start here
+## Folders
 
-- [Start here](START%20HERE.md): the folder layout.
-- [Instructor guide](Instructor%20Guide/00%20-%20START%20HERE.md): purpose, setup, stages, solution approaches, defects, and assessment.
-- [Setup instructions](Instructor%20Guide/02%20-%20Setup.md): Windows installation and verification.
-- [Package](Package/README.md): the material intended for trainees.
-- [Stage one](Package/course/stage-one.md): initial assignment.
+- [Package](Package/README.md): Workframe, a standalone local Python task library.
+- [Exercise](Exercise/README.md): assignments, Excel data, JSON schemas, starter
+  application, and data generator.
+- [Instructor Guide](Instructor%20Guide/00%20-%20START%20HERE.md): solution
+  approaches, defect map, reference tools, assessment, and private author checks.
 
-The instructor guide and reference repairs are instructor-only materials.
-Distribute the Package folder to trainees rather than this whole repository.
+Only the outer exercise materials describe the educational setup. The library
+has ordinary project documentation, its own package metadata, examples, and
+public tests. Do not distribute the Instructor Guide to trainees.
 
-## Contents
+## Setup
 
-Package/src/workframe contains the execution skeleton (approximately 1,200 lines
-across 14 modules). Package/data/samples includes equivalent single- and
-multi-workbook Excel tables and external JSON schemas.
-
-The skeleton includes a built-in timer and Windows Job Object enforcement of a
-shared CPU and committed-memory budget for the driver and all executors. It also
-contains intentional readability, contract, state, and execution defects.
-
-## Quick start on Windows
-
-From Package in PowerShell:
+From the repository root in PowerShell:
 
 ```powershell
-./scripts/setup.ps1
-./scripts/check.ps1
-./.venv/Scripts/python.exe -m pytest '../Instructor Guide/Verification' -q
+./Exercise/setup.ps1
+./Package/scripts/check.ps1
+./Package/.venv/Scripts/python.exe -m pytest 'Instructor Guide/Verification' -q
 ```
 
-The instructor suite expects 18 passing checks and 4 strict expected failures
-that reproduce the deliberately planted defects. Those expected failures are
-part of the exercise. A completed trainee engine is not supplied.
+The instructor checks expect 20 passing checks and four strict expected failures
+that reproduce the planted defects. Workframe's own tests cover ordinary use;
+the private checks capture the exercise-specific failure scenarios.
 
-Virtual environments, caches, runtime reports, build artifacts, and large
-generated datasets are not tracked. Dependency installation needs network
-access; table processing runs entirely locally. Pilot the schedule and calibrate
-assessment budgets before setting time thresholds.
+The built-in timer and Windows Job Object manager enforce one shared CPU and
+committed-memory budget for the driver and its executors. Everything executes
+locally after dependency installation. Pilot the schedule and calibrate limits
+before assigning performance thresholds.

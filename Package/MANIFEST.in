@@ -1,11 +1,11 @@
 include README.md CONTRIBUTING.md
-prune instructor
-prune checks
-prune docs
-prune course
-prune tools
-prune trainee
-prune data
+recursive-include tests *.py
+recursive-include examples *.py
+recursive-include scripts *.ps1
+recursive-include tools *.py
+recursive-include profiles *.json
 prune reports
-exclude EXERCISE_PLAN.md AUTHORING.md
+prune build
+prune dist
 global-exclude *.pyc
+global-exclude __pycache__

@@ -13,5 +13,7 @@ reports/
 !.env.example
 
 # Keep the small shared sample tables; regenerate larger workloads locally.
-/Package/data/*
-!/Package/data/samples/
+/Exercise/data/*
+!/Exercise/data/samples/
+
+/Artifacts/

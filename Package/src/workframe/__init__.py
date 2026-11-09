@@ -1,4 +1,4 @@
-"""Local execution skeleton. Query and table logic belongs to the trainee.
+"""Local Python task execution and process diagnostics.
 
 Runtime provides explicit process/transport primitives. ExecutionOptions
 configures those primitives without choosing a scheduling policy. The

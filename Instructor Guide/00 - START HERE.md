@@ -15,4 +15,4 @@ The numbered documents are the explanations/answers. Reference/instructor contai
 
 The reference files are not a complete finished trainee engine. The guide explains how to build one; it does not hand trainees a solved parallel query engine. A human pilot is still needed to validate the ten-day schedule and performance thresholds.
 
-Only distribute the sibling Package folder to trainees. Release the stage-two brief separately after their first review.
+Give trainees the sibling Package and Exercise folders, keeping this Instructor Guide private. Workframe documentation intentionally contains no teaching labels; educational context belongs in Exercise. Release the stage-two brief separately after their first review.

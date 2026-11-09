@@ -1,25 +1,38 @@
 # Where the files are
 
-## Package ? give this to trainees
+## Package: standalone Workframe library
 
-- src/workframe: actual generic library source (about 1,200 lines in 14 modules).
-- trainee/driver.py: placeholder for their application.
-- examples: simple transport and diagnostics demonstrations, not a query solution.
-- data/samples: ready-to-use Excel tables and external schemas.
-- course/stage-one.md: initial assignment.
-- profiles/development.json: example shared CPU/memory/timeout budget.
-- scripts: setup.ps1, check.ps1, build.ps1.
-- tools: data generator, smoke checks, and benchmark-report summarizer.
-- CONTRIBUTING.md: detailed development/build reference.
+- src/workframe: runtime source, about 1,200 lines in 14 modules.
+- pyproject.toml: ordinary workframe distribution metadata.
+- README.md and CONTRIBUTING.md: library usage and development instructions.
+- examples: generic execution and diagnostics examples.
+- tests: public normal-path library tests, with no defect spoilers.
+- profiles: resource-budget examples.
+- scripts: library setup, checks, and building.
+- tools: smoke execution and report summaries.
 
-## Instructor Guide ? keep this yourself
+No assignment, schema, Excel data, exercise dependencies, answers, or trainee
+placeholder lives inside this folder. Internal source defects are preserved.
 
-- 00 through 08 Markdown files: setup, purpose, stages, solution approaches, faults, assessment, and this map.
-- Reference/instructor/reference.py: sequential correctness oracle.
-- Reference/instructor/fixed_runtime.py: example repairs to runtime defects.
-- Reference/instructor/checkpoint.json: two-filter checkpoint expression.
-- Verification: author checks, including the deliberate failure scenarios.
+## Exercise: materials given to trainees
 
-There are no copied virtual environments, build caches, or old package versions in this Desktop copy. Run setup to create a new local editable environment. Python source changes in Package/src/workframe then affect newly launched workers.
+- README.md and setup.ps1: assignment overview and dependency setup.
+- requirements.txt: Excel reader dependency.
+- stages/stage-one.md: initial assignment; release later briefs after review.
+- starter/driver.py: placeholder for the trainee engine.
+- data/samples: local workbooks and external JSON schemas.
+- tools/make_data.py: reproducible workbook generator.
 
-The reference repair and oracle are support tools, not a complete solved parallel query engine. The required engine is the trainee's implementation.
+Distribute Package and Exercise together, keeping their sibling paths, or let
+trainees install Workframe as a dependency and adapt their application paths.
+
+## Instructor Guide: keep private from trainees
+
+- Numbered Markdown: purpose, setup, stages, solution approaches, defect map,
+  assessment, and this folder map.
+- Reference/instructor: sequential oracle, sample runtime repairs, and checkpoint.
+- Verification: full author checks, including intended failure scenarios and
+  checks that the library contains no assignment material.
+
+The oracle and runtime repairs are support tools rather than a completed
+parallel query engine. Trainees implement that engine themselves.

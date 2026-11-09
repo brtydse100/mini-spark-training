@@ -6,7 +6,7 @@ Budget: three implementation days, then mentor review/consolidation. Work withou
 
 Implement a driver and executor task logic using workframe. A driver creates several executor processes. An executor receives JSON describing a Python task file and its inputs, executes the task's run(data), and returns JSON. You implement how table work becomes tasks and how results combine.
 
-Support a table in one .xlsx file or spread across several files. All parts use one explicit external schema.json. Generate examples with tools/make_data.py. Column names live in the first worksheet row; its name comes from the schema. Ignore formatting, formula calculation, and macros.
+Support a table in one .xlsx file or spread across several files. All parts use one explicit external schema.json. Generate examples with Exercise/tools/make_data.py from the outer repository (or ../Exercise/tools/make_data.py when running from Package). Column names live in the first worksheet row; its name comes from the schema. Ignore formatting, formula calculation, and macros.
 
 Implement your own Python query methods:
 

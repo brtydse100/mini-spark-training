@@ -1,4 +1,4 @@
-"""Public checks verify installation and the ordinary task path only."""
+"""Verify a local Workframe installation using two executor processes."""
 from pathlib import Path
 from workframe import Runtime
 
@@ -11,7 +11,7 @@ def main():
         actual = sorted(r.receive(15)["result"] for _ in range(2))
         if actual != [0, 6]:
             raise AssertionError(actual)
-    print("Installation and ordinary execution checks passed. This is not a full correctness certificate.")
+    print("Workframe installation and local execution checks passed.")
 
 
 if __name__ == "__main__":

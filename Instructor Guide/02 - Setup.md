@@ -5,7 +5,7 @@ Open PowerShell. Use the actual Desktop path reported by Windows:
 ```powershell
 $exercise = Join-Path ([Environment]::GetFolderPath('Desktop')) 'Mini Spark Exercise'
 Set-Location (Join-Path $exercise 'Package')
-./scripts/setup.ps1
+../Exercise/setup.ps1
 ./scripts/check.ps1
 ```
 
@@ -18,13 +18,14 @@ If PowerShell blocks scripts, use these equivalent commands instead:
 ```powershell
 python -m venv .venv
 ./.venv/Scripts/python.exe -m pip install -e ".[dev]"
+./.venv/Scripts/python.exe -m pip install -r ../Exercise/requirements.txt
 ./.venv/Scripts/python.exe tools/smoke.py
 ./.venv/Scripts/python.exe -m workframe.launcher examples/local_driver.py
 ```
 
 ## Sample data
 
-Already included under Package/data/samples:
+Already included under Exercise/data/samples:
 
 - single/schema.json and single/part-001.xlsx
 - multiple/schema.json and multiple/part-001.xlsx through part-004.xlsx
@@ -34,7 +35,7 @@ Both tables contain the same 1,200 records. Worksheet name is data. Read schema.
 Generate a separate larger workload in a fresh directory:
 
 ```powershell
-./.venv/Scripts/python.exe tools/make_data.py data/larger --rows 200000 --parts 8 --skew
+./.venv/Scripts/python.exe ../Exercise/tools/make_data.py ../Exercise/data/larger --rows 200000 --parts 8 --skew
 ```
 
 ## Built-in timer and resource manager
@@ -45,7 +46,7 @@ Generate a separate larger workload in a fresh directory:
 
 The profile gives the entire driver/process tree 25% of machine CPU capacity, 512 MiB committed memory, and a 120-second timeout. These are development examples; calibrate assessment settings on your machine. Extra executors share the same budget. The timer covers startup, computation, output, and shutdown. Reports contain timing, CPU, Windows memory counters, and actual limit readback. This measures committed memory, not physical RAM.
 
-The real trainee driver initially raises NotImplementedError. This is intentional; run the example for setup verification, then let trainees implement their driver.
+Exercise/starter/driver.py initially raises NotImplementedError. This is intentional; run the example for setup verification, then let trainees implement their driver.
 
 ## Rebuild the Python package
 
@@ -63,13 +64,15 @@ From Package:
 ./.venv/Scripts/python.exe -m pytest '../Instructor Guide/Verification' -q
 ```
 
-Expected starter result: 18 passed and 4 xfailed. The expected failures document intentional bugs. Instructor conftest points at this Desktop copy, not the original scratch workspace.
+Expected starter result: 20 passed and 4 xfailed. The expected failures document intentional bugs. Instructor conftest points at this Desktop copy, not the original scratch workspace.
 
 ## Reference count
 
 ```powershell
-./.venv/Scripts/python.exe '../Instructor Guide/Reference/instructor/reference.py' data/samples/single
-./.venv/Scripts/python.exe '../Instructor Guide/Reference/instructor/reference.py' data/samples/multiple --expression '../Instructor Guide/Reference/instructor/checkpoint.json'
+./.venv/Scripts/python.exe '../Instructor Guide/Reference/instructor/reference.py' ../Exercise/data/samples/single
+./.venv/Scripts/python.exe '../Instructor Guide/Reference/instructor/reference.py' ../Exercise/data/samples/multiple --expression '../Instructor Guide/Reference/instructor/checkpoint.json'
 ```
 
 Expected: 1,200 unfiltered; 200 for the two-filter checkpoint. Comparison rules are explicit in the oracle. Adapt assessment to a trainee's documented choices where the assignment permits them.
+
+Workframe is installed as the ordinary distribution `workframe` (import `workframe`). Package dependencies cover the runtime only; Exercise/requirements.txt adds the Excel reader for the assignment. Workframe itself does not load table schemas or describe the exercise.

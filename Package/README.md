@@ -1,34 +1,77 @@
-# Workframe training exercise
+# Workframe
 
-Build a local Python processing engine over Excel tables. The provided package is generic execution plumbing; you implement the driver, executor tasks, schema handling, filter, count, and show.
+Workframe runs local Python tasks in separate executor processes. A driver
+submits JSON-compatible inputs with a Python file path and receives completion
+messages containing a result or error. It includes execution options,
+diagnostics, task timing, and a Windows launcher with process-tree resource
+limits.
 
-Start with [CONTRIBUTING.md](CONTRIBUTING.md), then [stage one](course/stage-one.md).
+## Install
 
-Windows 10/11, 64-bit Python 3.11 or newer. Everything runs locally after dependencies are installed. Microsoft Excel is not needed at runtime.
-
-```powershell
-./scripts/setup.ps1
-./scripts/check.ps1
-./.venv/Scripts/python.exe tools/make_data.py data/stage-one --rows 1200 --parts 4
-```
-
-Each generated table directory contains one shared schema.json and one or more .xlsx workbooks. single and multiple represent identical rows. Workbooks use the data worksheet and literal cells, with column names in the first row.
-
-Use the supplied runtime primitives to build your own engine. The small sum example demonstrates task-file loading and JSON transport only. The starter is exercise material: understand its behavior before extending it. Passing the installation smoke check establishes only the ordinary example path.
-
-## Assessed execution
+Requires Python 3.11 or newer. Windows 10/11 supports the resource-controlled
+launcher. Install from this directory:
 
 ```powershell
-./.venv/Scripts/python.exe -m workframe.launcher --cpu-percent 25 --memory-mb 512 --timeout 120 --report reports/my-run.json trainee/driver.py
+python -m pip install .
 ```
 
-Replace trainee/driver.py with your implementation. It initially raises NotImplementedError. CPU and committed-memory limits cover the driver and all executors together. More processes do not receive additional resources. Values above are development examples; the mentor sets assessed limits. The timer includes startup, execution, output, and shutdown. Review the JSON report even on failure.
+For development, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-The learner implements filter, count, show, and later partitioning and lazy evaluation. No completed table/query engine is included in the package.
+## Run a task
+
+Create a Python file named task.py:
+
+```python
+def run(data):
+    return sum(data["values"])
+```
+
+Create driver.py beside it:
+
+```python
+from pathlib import Path
+from workframe import Runtime
 
 
-The library source is in src/workframe (14 modules). ExecutionOptions,
-runtime snapshots, bounded events and task timing, task-file inspection,
-and reusable benchmark profiles are provided as generic support primitives.
-Try examples/diagnostics_driver.py under profiles/development.json. The
-trainee remains responsible for all query and scheduling logic.
+def main():
+    task = Path(__file__).with_name("task.py")
+    with Runtime(2) as runtime:
+        runtime.submit(0, task, {"values": [1, 2, 3]}, task_id="first")
+        runtime.submit(1, task, {"values": [4, 5]}, task_id="second")
+        for message in runtime.receive_many(2):
+            print(message["task_id"], message["result"])
+
+
+if __name__ == "__main__":
+    main()
+```
+
+Run `python driver.py`. A task entry point accepts one data argument and
+returns a JSON-compatible value. Completion messages include task identity,
+executor index, status, and timing. Exceptions become TaskError values with
+remote traceback details. Keep process creation behind a main guard.
+
+## Resource-controlled execution
+
+```powershell
+python -m workframe.launcher --cpu-percent 25 --memory-mb 512 --timeout 120 --report reports/run.json driver.py
+```
+
+The CPU cap and committed-memory budget cover the driver and its descendants
+together. Timing covers startup through process-tree shutdown. Windows Job
+Objects enforce the limits; unsupported assignment produces an error rather
+than silently running without limits. `workframe-run` exposes the same launcher.
+
+A reusable JSON profile can supply cpu_percent, memory_mb, and timeout. See
+profiles/development.json and the generic examples in examples/.
+
+## Configuration and diagnostics
+
+ExecutionOptions configures input queue capacity, receive/shutdown deadlines,
+message size, entry point, and working directory. Runtime.inspect() returns a
+snapshot; export_diagnostics() writes JSON and JSONL observations. EventLog,
+Counters, Stopwatch, and bounded timing samples support application diagnostics.
+
+Scheduling policy and workload interpretation belong to the calling application.
+For API usage, development commands, report interpretation, and troubleshooting,
+see [CONTRIBUTING.md](CONTRIBUTING.md).
