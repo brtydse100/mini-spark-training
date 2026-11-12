@@ -4,23 +4,23 @@ This is an architectural solution guide, not the only acceptable class design.
 
 ## Responsibilities
 
-- Table: records workbook paths and explicit schema; validates headers.
-- Schema: converts/validates cell values according to declared types.
+- Table: records CSV file paths and explicit schema; validates headers.
+- Schema: converts/validates field values according to declared types.
 - Expressions: represent columns, literals, operators, and grouped conditions.
 - Driver: creates executors/tasks, tracks task identity, receives results, and aggregates them.
 - Executor task file: reads its assigned input, applies schema and predicates, and returns a JSON-compatible result.
 
 ## Processing flow
 
-1. Resolve a file or table directory into workbook paths and one schema.
-2. Read the designated worksheet with openpyxl, preferably streaming rows.
-3. Check headers against the schema and exclude the header from records.
+1. Resolve a file or table directory into CSV file paths and one schema.
+2. Open the CSV with its declared encoding and newline="", and iterate csv.reader using the schema delimiter/quote character. Parse logical records rather than splitting physical lines.
+3. Check each file header against the schema and exclude it from data records. Map the reserved null token to None; preserve ordinary empty text separately.
 4. Convert each value; keep null, boolean, integer, decimal, and string semantics explicit.
 5. Evaluate the filter expression against each row.
 6. For count, increment a local integer. For show, collect only a bounded result batch.
 7. Return a JSON result with task identity. The driver adds partial counts or formats rows with headers.
 
-Initially assign one whole-workbook task per executor at a time. When a task completes, the trainee driver can choose more work. A table in one workbook can use one executor in stage one; splitting it is stage two.
+Initially assign one whole-file task per executor at a time. When a task completes, the trainee driver can choose more work. A table in one CSV file can use one executor in stage one; splitting it is stage two.
 
 ## Expressions over JSON
 
@@ -51,4 +51,4 @@ Use a limit, such as show(20), and a documented ordering guarantee. Task results
 
 ## Verification
 
-Compare one-workbook and multi-workbook answers. Check zero matches, nulls, quoted/newline text inside cells, boolean combinations, invalid columns/types, and the header. The sample has 1,200 rows. Trace actual JSON messages. Use the supplied launcher to measure a complete run under the shared budget.
+Compare one-file and multi-file answers. Check zero matches, nulls, quoted commas, escaped quotes, Unicode, and newlines inside fields, boolean combinations, invalid columns/types, and the header. The sample has 1,200 rows. Trace actual JSON messages. Use the supplied launcher to measure a complete run under the shared budget.

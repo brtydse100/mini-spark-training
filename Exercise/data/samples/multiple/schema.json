@@ -1,6 +1,11 @@
 {
   "table": "people",
-  "sheet": "data",
+  "csv": {
+    "encoding": "utf-8",
+    "delimiter": ",",
+    "quotechar": "\"",
+    "null_token": "\\N"
+  },
   "version": 1,
   "columns": [
     {

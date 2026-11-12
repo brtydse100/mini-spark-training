@@ -9,7 +9,7 @@ Set-Location (Join-Path $exercise 'Package')
 ./scripts/check.ps1
 ```
 
-If your folder has a date suffix, change the folder name in the first command. Python 3.11+ must be installed. Setup creates a fresh .venv and installs the editable package and development dependencies. Initial dependency installation uses the network; all workbook/query execution is local. Excel itself is not required.
+If your folder has a date suffix, change the folder name in the first command. Python 3.11+ must be installed. Setup creates a fresh .venv and installs the editable package and development dependencies. Initial dependency installation uses the network; all table/query execution is local. No spreadsheet application or third-party data reader is required.
 
 Expected check: two generic tasks return 6 and 9; the resource-managed run reports success. This verifies installation and the simple path, not advanced correctness.
 
@@ -27,10 +27,10 @@ python -m venv .venv
 
 Already included under Exercise/data/samples:
 
-- single/schema.json and single/part-001.xlsx
-- multiple/schema.json and multiple/part-001.xlsx through part-004.xlsx
+- single/schema.json and single/part-001.csv
+- multiple/schema.json and multiple/part-001.csv through part-004.csv
 
-Both tables contain the same 1,200 records. Worksheet name is data. Read schema.json for column names, types, and nullability. Do not count the header. The age >= 18 then age < 30 checkpoint produces **200** rows in either table.
+Both tables contain the same 1,200 records. Read schema.json for CSV encoding, delimiter, quote character, null marker, column names, types, and nullability. CSV values are text until converted using that schema. Do not count the header. The age >= 18 then age < 30 checkpoint produces **200** rows in either table.
 
 Generate a separate larger workload in a fresh directory:
 
@@ -65,7 +65,7 @@ From Package:
 ./.venv/Scripts/python.exe -m pytest '../Instructor Guide/Verification' -q
 ```
 
-Expected starter result: 20 passed and 4 xfailed. The expected failures document intentional bugs. Instructor conftest points at this Desktop copy, not the original scratch workspace.
+Expected starter result: 23 passed and 4 xfailed. The expected failures document intentional bugs. Instructor conftest points at this Desktop copy, not the original scratch workspace.
 
 ## Reference count
 
@@ -76,7 +76,7 @@ Expected starter result: 20 passed and 4 xfailed. The expected failures document
 
 Expected: 1,200 unfiltered; 200 for the two-filter checkpoint. Comparison rules are explicit in the oracle. Adapt assessment to a trainee's documented choices where the assignment permits them.
 
-Workframe is installed as the ordinary distribution `workframe` (import `workframe`). Package dependencies cover the runtime only; Exercise/requirements.txt adds the Excel reader for the assignment. Workframe itself does not load table schemas or describe the exercise.
+Workframe is installed as the ordinary distribution `workframe` (import `workframe`). Package dependencies cover the runtime only; CSV generation and reading use the Python standard library; Exercise/requirements.txt currently lists no extra dependencies. Workframe itself does not load table schemas or describe the exercise.
 
 
 ## Source checks versus wheel checks

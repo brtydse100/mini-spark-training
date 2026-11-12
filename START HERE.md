@@ -4,7 +4,7 @@ There are three separate folders:
 
 1. **Package** is Workframe, a normal Python library: source, metadata,
    documentation, generic examples, tests, setup/build scripts, and benchmarks.
-2. **Exercise** contains the actual assignment, stages, Excel tables, JSON
+2. **Exercise** contains the actual assignment, stages, CSV tables, JSON
    schemas, data generator, and application starter. Trainees build their engine
    here while using and investigating Workframe.
 3. **Instructor Guide** contains answers, setup notes, defect explanations,

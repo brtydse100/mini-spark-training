@@ -1,13 +1,13 @@
 # Mini Spark Training
 
 A two-week local Python exercise for developers familiar with OOP and SOLID.
-Trainees build an Excel query engine using Workframe, then extend their engine
+Trainees build an CSV query engine using Workframe, then extend their engine
 with partitioning and lazy evaluation while investigating dependency behavior.
 
 ## Folders
 
 - [Package](Package/README.md): Workframe, a standalone local Python task library.
-- [Exercise](Exercise/README.md): assignments, Excel data, JSON schemas, starter
+- [Exercise](Exercise/README.md): assignments, CSV data, JSON schemas, starter
   application, and data generator.
 - [Instructor Guide](Instructor%20Guide/00%20-%20START%20HERE.md): solution
   approaches, defect map, reference tools, assessment, and private author checks.
@@ -26,7 +26,7 @@ From the repository root in PowerShell:
 ./Package/.venv/Scripts/python.exe -m pytest 'Instructor Guide/Verification' -q
 ```
 
-The instructor checks expect 20 passing checks and four strict expected failures
+The instructor checks expect 23 passing checks and four strict expected failures
 that reproduce the planted defects. Workframe's own tests cover ordinary use;
 the private checks capture the exercise-specific failure scenarios.
 

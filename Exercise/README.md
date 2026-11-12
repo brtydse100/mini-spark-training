@@ -12,7 +12,7 @@ From the repository root in PowerShell:
 
 Read [stage one](stages/stage-one.md). Write your engine under starter/ or create
 your own application directory. Table samples and schema.json files are under
-data/samples; single and multiple contain equivalent rows. The library itself
+data/samples; single and multiple contain equivalent rows. See [DATA_FORMAT.md](DATA_FORMAT.md) for parsing, types, and null handling. The library itself
 contains no table/query implementation.
 
 From Package, generate a fresh workload with:

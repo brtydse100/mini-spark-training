@@ -11,17 +11,18 @@
 - scripts: library setup, checks, and building.
 - tools: smoke execution and report summaries.
 
-No assignment, schema, Excel data, exercise dependencies, answers, or trainee
+No assignment, schema, CSV data, exercise dependencies, answers, or trainee
 placeholder lives inside this folder. Internal source defects are preserved.
 
 ## Exercise: materials given to trainees
 
 - README.md and setup.ps1: assignment overview and dependency setup.
-- requirements.txt: Excel reader dependency.
+- requirements.txt: currently no extra data-reading dependencies; CSV uses the standard library.
 - stages/stage-one.md: initial assignment; release later briefs after review.
 - starter/driver.py: placeholder for the trainee engine.
-- data/samples: local workbooks and external JSON schemas.
-- tools/make_data.py: reproducible workbook generator.
+- DATA_FORMAT.md: CSV dialect, schema, nulls, and record-boundary rules.
+- data/samples: local CSV files and external JSON schemas.
+- tools/make_data.py: reproducible CSV generator.
 
 Distribute Package and Exercise together, keeping their sibling paths, or let
 trainees install Workframe as a dependency and adapt their application paths.

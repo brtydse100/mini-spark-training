@@ -5,12 +5,11 @@ Expressions: {"column": "age"}, literal JSON values, or
 Null follows SQL-style unknown. Only True selects a row.
 """
 import argparse
+import csv
 from decimal import Decimal
 import json
-import math
 from pathlib import Path
 import re
-from openpyxl import load_workbook
 
 
 def convert(value, kind):
@@ -103,29 +102,29 @@ def rows(table):
     table = Path(table)
     schema = json.loads((table / "schema.json").read_text(encoding="utf-8"))
     columns = schema["columns"]
-    paths = sorted(table.glob("*.xlsx"))
+    paths = sorted(table.glob("*.csv"))
     if not paths:
-        raise ValueError("No workbooks")
+        raise ValueError("No CSV files")
+    options = schema["csv"]
     for path in paths:
-        wb = load_workbook(path, read_only=True, data_only=False)
-        try:
-            sheet = wb[schema["sheet"]]
-            iterator = sheet.iter_rows(values_only=True)
-            if next(iterator, None) != tuple(c["name"] for c in columns):
+        with path.open(encoding=options["encoding"], newline="") as stream:
+            iterator = csv.reader(stream, delimiter=options["delimiter"],
+                                  quotechar=options["quotechar"], strict=True)
+            if next(iterator, None) != [c["name"] for c in columns]:
                 raise ValueError(f"Header mismatch: {path}")
             for number, values in enumerate(iterator, 2):
-                if len(values) > len(columns):
-                    raise ValueError(f"Width mismatch: {path}:{number}")
-                # Streaming XLSX rows may omit trailing blank cells.
-                values += (None,) * (len(columns) - len(values))
+                if len(values) != len(columns):
+                    raise ValueError(f"Width mismatch: {path}:record {number}")
                 result = {}
-                for c, value in zip(columns, values):
+                for c, text in zip(columns, values):
+                    value = None if text == options["null_token"] else text
                     if value is None and not c["nullable"]:
-                        raise ValueError(f"Null {c['name']} at {path}:{number}")
-                    result[c["name"]] = convert(value, c["type"])
+                        raise ValueError(f"Null {c['name']} at {path}:record {number}")
+                    try:
+                        result[c["name"]] = convert(value, c["type"])
+                    except (ValueError, TypeError, ArithmeticError) as error:
+                        raise ValueError(f"Invalid {c['name']} at {path}:record {number}: {error}") from error
                 yield result
-        finally:
-            wb.close()
 
 
 def main():

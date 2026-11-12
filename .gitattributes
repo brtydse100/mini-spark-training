@@ -1,0 +1,2 @@
+# CSV record and embedded-field newlines are data; preserve exact bytes.
+*.csv -text

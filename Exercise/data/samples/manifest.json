@@ -1,4 +1,5 @@
 {
+  "format": "csv",
   "rows_per_table": 1200,
   "parts": 4,
   "seed": 42,

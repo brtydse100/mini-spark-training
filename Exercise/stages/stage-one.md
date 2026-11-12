@@ -1,12 +1,12 @@
 # Stage one: build the engine foundations
 
-Budget: three implementation days, then mentor review/consolidation. Work without AI. You may use documentation, debugging, profiling, standard Python facilities, and openpyxl. Write and run your own experiments. Automated test authoring is optional; verifying behavior is required.
+Budget: three implementation days, then mentor review/consolidation. Work without AI. You may use documentation, debugging, profiling, standard Python facilities, including csv. Write and run your own experiments. Automated test authoring is optional; verifying behavior is required.
 
 ## Assignment
 
 Implement a driver and executor task logic using workframe. A driver creates several executor processes. An executor receives JSON describing a Python task file and its inputs, executes the task's run(data), and returns JSON. You implement how table work becomes tasks and how results combine.
 
-Support a table in one .xlsx file or spread across several files. All parts use one explicit external schema.json. Generate examples with Exercise/tools/make_data.py from the outer repository (or ../Exercise/tools/make_data.py when running from Package). Column names live in the first worksheet row; its name comes from the schema. Ignore formatting, formula calculation, and macros.
+Support a table in one .csv file or spread across several files. All parts use one explicit external schema.json. Generate examples with Exercise/tools/make_data.py from the outer repository (or ../Exercise/tools/make_data.py when running from Package). Column names are in the first CSV record. Read the encoding, delimiter, quoting, and null-token rules from schema.json. Use csv.reader for record parsing, then implement schema application and query evaluation yourself. See [the data-format contract](../DATA_FORMAT.md).
 
 Implement your own Python query methods:
 
@@ -16,7 +16,7 @@ Implement your own Python query methods:
 
 Include comparison to literals and compatible columns, LIKE with documented percent/underscore wildcard and escape rules, and nested conditions. No SQL string parser, joins, window functions, or subqueries are required. Use ordinary expression/method definitions of your design. Do not delegate query processing to pandas, Spark, SQL engines, or an existing DataFrame library.
 
-Define conversion/comparison rules: supported types, precision, invalid numeric text, non-integral integers, null versus empty text, case sensitivity, incompatible types, division by zero, and unknown columns. Document whether null comparisons use SQL-style unknown or another explicit model. Schema validation must cover all workbook parts.
+Define conversion/comparison rules: supported types, precision, invalid numeric text, non-integral integers, null versus empty text, case sensitivity, incompatible types, division by zero, and unknown columns. Document whether null comparisons use SQL-style unknown or another explicit model. Schema validation must cover all CSV parts.
 
 Filter expressions need a representation that can be sent as JSON to executors. Count tasks should return partial counts; show tasks return bounded row results. Do not collect an entire filtered table to display twenty rows. Your application owns driver dispatch/aggregation, executor behavior, parsing, query representation, and error handling. Whole-file tasks are acceptable initially.
 
@@ -51,3 +51,5 @@ separate formatting helper internally.
 In stage two, constructing the query remains lazy. Calling count() or show()
 on your query object triggers execution. show() still limits displayed rows and
 must not collect the entire table just to display a small sample.
+
+CSV fields arrive as text. Convert them using the explicit schema; do not infer column types from the first few rows. Quoted fields may contain commas, double quotes, and line breaks. A physical line is not necessarily a complete record.

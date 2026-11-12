@@ -2,9 +2,21 @@
 
 ## Partitioning
 
-Treat worksheet rows as records. XLSX is not a flat line file; cutting raw workbook bytes is not a partitioning strategy. One viable design uses a streaming reader that makes bounded row batches, serializes those batches into JSON tasks, and distributes them to executors. A limited number of in-flight batches provides backpressure. Account for driver reading/serialization within the same CPU/memory budget.
+Treat logical CSV records as rows. Fields may contain quoted commas, doubled
+quotes, Unicode, and line breaks. Splitting at arbitrary bytes or every newline
+can lose or duplicate records or break UTF-8 decoding. Headers must be handled
+once per source file and never counted as data.
 
-Alternatively, design workbook/row-range assignments, but measure repeated workbook parsing. Reopening and walking from the start for every range can defeat the optimization. Whichever approach is chosen, every record must be processed exactly once and headers must not recur as data.
+One viable approach streams records through csv.reader and builds bounded row
+batches for executors. Limit the number of in-flight batches to provide
+backpressure. A more advanced approach assigns byte ranges after correctly
+identifying record boundaries and preserving header/schema context. Do not
+require one particular approach; assess correctness and measured costs.
+
+Include record parsing, boundary discovery, input reading, serialization, and
+any preprocessing in the timer/resource budget. Avoid an unmeasured full scan
+to prepare partitions. Every logical row must be processed exactly once, even
+when its text contains physical newlines.
 
 Balanced work does not require identical row counts. Variable row sizes or expensive predicates can make equal counts unequal costs. Measure task durations, try different chunk sizes, and choose an executor count instead of spawning as many as possible.
 

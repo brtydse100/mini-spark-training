@@ -1,11 +1,11 @@
-"""Generate local literal-value XLSX tables without building a query engine."""
+"""Generate local UTF-8 CSV tables without building a query engine."""
 import argparse
+import csv
 import json
 from pathlib import Path
 import random
-from openpyxl import Workbook
 
-SCHEMA = {"table": "people", "sheet": "data", "version": 1, "columns": [
+SCHEMA = {"table": "people", "csv": {"encoding": "utf-8", "delimiter": ",", "quotechar": '"', "null_token": "\\N"}, "version": 1, "columns": [
     {"name": "id", "type": "integer", "nullable": False},
     {"name": "name", "type": "string", "nullable": False},
     {"name": "age", "type": "integer", "nullable": True},
@@ -22,12 +22,12 @@ def records(count, seed):
                None if i % 17 == 0 else rng.randrange(10, 81),
                f"{rng.randrange(2000, 15000)}.{i % 100:02}",
                ("IL", "US", "GB", "DE")[i % 4], i % 3 != 0,
-               None if i % 11 == 0 else ('Line one, "quoted"\n???? ????? ' + "x" * (i % 40)))
+               None if i % 11 == 0 else ('Line one, "quoted"\n\u05e9\u05d5\u05e8\u05d4 \u05e9\u05e0\u05d9\u05d9\u05d4 ' + "x" * (i % 40)))
 
 
 def generate(output, rows=1200, parts=4, seed=42, skew=False):
-    if not 0 <= rows <= 1_048_575 or not 1 <= parts <= 100:
-        raise ValueError("rows must be 0..1048575; parts must be 1..100")
+    if type(rows) is not int or rows < 0 or type(parts) is not int or not 1 <= parts <= 100:
+        raise ValueError("rows must be a nonnegative integer; parts must be 1..100")
     output = Path(output)
     # Never silently mix new files with an old generated table.
     if any((output / variant).exists() for variant in ("single", "multiple")):
@@ -43,14 +43,18 @@ def generate(output, rows=1200, parts=4, seed=42, skew=False):
             sizes = [rows * 8 // 10] + [remaining // (n-1) + (i < remaining % (n-1)) for i in range(n-1)]
         source = iter(records(rows, seed))
         for index, size in enumerate(sizes, 1):
-            wb = Workbook(write_only=True)
-            ws = wb.create_sheet("data")
-            ws.append([c["name"] for c in SCHEMA["columns"]])
-            for _ in range(size):
-                ws.append(next(source))
-            wb.save(directory / f"part-{index:03}.xlsx")
-            wb.close()
-    (output / "manifest.json").write_text(json.dumps({"rows_per_table": rows, "parts": parts, "seed": seed, "skew": skew}, indent=2))
+            path = directory / f"part-{index:03}.csv"
+            with path.open("w", encoding="utf-8", newline="") as stream:
+                writer = csv.writer(stream)
+                writer.writerow([c["name"] for c in SCHEMA["columns"]])
+                for _ in range(size):
+                    row = next(source)
+                    writer.writerow([
+                        SCHEMA["csv"]["null_token"] if v is None
+                        else str(v).lower() if isinstance(v, bool)
+                        else v for v in row
+                    ])
+    (output / "manifest.json").write_text(json.dumps({"format": "csv", "rows_per_table": rows, "parts": parts, "seed": seed, "skew": skew}, indent=2))
 
 
 def main():
