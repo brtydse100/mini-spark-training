@@ -40,6 +40,13 @@ The JSON schema is authoritative. Decide whether numeric text is converted, whet
 
 ## Show
 
+show is a method of the trainee's own Table/Query abstraction, not a method
+added to the Workframe library. Executors return JSON-compatible row data;
+Runtime.receive() returns a decoded dictionary. The driver extracts and combines
+bounded row results, then the application formats them. A formatting helper may
+accept those results, but the query action remains application-owned. A JSON
+dictionary itself does not have a show method.
+
 Use a limit, such as show(20), and a documented ordering guarantee. Task results carry bounded rows rather than the entire filtered table. The driver coordinates limits and may read more than the displayed number because of concurrency. It must still bound memory. Do not assume completion order is table order.
 
 ## Verification

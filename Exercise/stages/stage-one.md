@@ -27,3 +27,27 @@ One documented command runs your driver under the supplied timer/resource manage
 ## Review
 
 Trace one task through your engine and the dependency. Explain responsibilities, how schema/expressions cross the JSON boundary, how you verified answers, and one assumption that might fail with a different workload. Bring a small reproducible example. You are not expected to rewrite the entire library.
+
+
+## Where show belongs
+
+Implement filter(), count(), and show() on your own table/query abstraction in
+your application. These methods are not additions to Workframe.Runtime or the
+library's transport classes. Workframe executes generic tasks and returns their
+completion messages; it does not know what a table or displayed row is.
+
+For show(), executors return bounded row data as their task result. For example:
+
+```json
+{"task_id":"rows-1","executor":0,"status":"ok","result":{"columns":["name","age"],"rows":[["Alice",28],["Bob",35]]}}
+```
+
+Runtime.receive() already decodes the JSON transport into a Python dictionary.
+Your driver reads the result, combines bounded batches where needed, and your
+show implementation formats rows with column headers. The JSON dictionary does
+not acquire a .show() method. Your query object's .show() action can use a
+separate formatting helper internally.
+
+In stage two, constructing the query remains lazy. Calling count() or show()
+on your query object triggers execution. show() still limits displayed rows and
+must not collect the entire table just to display a small sample.

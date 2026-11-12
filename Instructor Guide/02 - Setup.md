@@ -51,7 +51,8 @@ Exercise/starter/driver.py initially raises NotImplementedError. This is intenti
 ## Rebuild the Python package
 
 ```powershell
-./scripts/build.ps1
+./scripts/build.ps1       # Create wheel and source archive.
+./scripts/test-wheel.ps1  # Build/install/test the wheel in isolation.
 ```
 
 Wheel and source archives appear in Package/dist. Editable installation already picks up source changes in newly started processes; it does not require rebuilding after every edit.
@@ -76,3 +77,14 @@ Expected starter result: 20 passed and 4 xfailed. The expected failures document
 Expected: 1,200 unfiltered; 200 for the two-filter checkpoint. Comparison rules are explicit in the oracle. Adapt assessment to a trainee's documented choices where the assignment permits them.
 
 Workframe is installed as the ordinary distribution `workframe` (import `workframe`). Package dependencies cover the runtime only; Exercise/requirements.txt adds the Excel reader for the assignment. Workframe itself does not load table schemas or describe the exercise.
+
+
+## Source checks versus wheel checks
+
+From Package, scripts/check.ps1 exercises the current editable source install.
+scripts/test-wheel.ps1 builds a fresh wheel, installs it into a temporary clean
+environment, confirms the import comes from that environment, and runs public
+checks plus the resource-managed example. The new wheel stays in Package/dist;
+results stay in Package/reports. No manual wheel installation is required.
+This validates the supplied ordinary execution checks; it does not prove that
+all advanced behaviors or the trainee's query engine are correct.

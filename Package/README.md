@@ -15,7 +15,10 @@ launcher. Install from this directory:
 python -m pip install .
 ```
 
-For development, see [CONTRIBUTING.md](CONTRIBUTING.md).
+For development, see [CONTRIBUTING.md](CONTRIBUTING.md). After setup, use
+`scripts/check.ps1` for the editable install, `scripts/build.ps1` to create
+wheel/source archives, or `scripts/test-wheel.ps1` to build and test the wheel
+in a separate environment.
 
 ## Run a task
 

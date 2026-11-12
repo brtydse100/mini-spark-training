@@ -101,22 +101,32 @@ Summaries require matching budgets; callers control hardware and cache condition
 
 ## Test and build
 
+From this directory after setup:
+
+```powershell
+./scripts/check.ps1       # Check the current editable installation.
+./scripts/build.ps1       # Produce the wheel and source archive in dist/.
+./scripts/test-wheel.ps1  # Build a wheel, install it separately, and verify it.
+```
+
+The wheel command creates a fresh environment under .wheel-check, installs the
+newly built artifact, runs the public tests and smoke example, and checks the
+Windows resource launcher. It verifies that workframe imports from that separate
+environment rather than src/workframe. The environment is removed afterward;
+the wheel stays in dist/ and reports stay in reports/wheel-check.json and
+reports/wheel-runtime.json. Dependency installation requires network access or
+a populated pip cache. No manual environment activation or wheel selection is
+needed.
+
+Run just the public source tests with:
+
 ```powershell
 ./.venv/Scripts/python.exe -m pytest tests -q
-./scripts/build.ps1
 ```
 
-The build creates dist/workframe-0.3.0-py3-none-any.whl and a source archive.
-Verify the wheel in a separate environment:
-
-```powershell
-python -m venv .wheel-check
-./.wheel-check/Scripts/python.exe -m pip install ./dist/workframe-0.3.0-py3-none-any.whl
-./.wheel-check/Scripts/python.exe tools/smoke.py
-```
-
-Keep this checkout's examples for the smoke command. Continue source development
-using the editable .venv install. Rebuilding is unnecessary for every source edit.
+Source edits apply to new processes through the editable install. Restart any
+existing executors. Rebuild when verifying the installable artifact, rather
+than after every source edit.
 
 ## Troubleshooting
 
