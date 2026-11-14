@@ -11,6 +11,8 @@ from .diagnostics import EventLog
 from .metrics import Counters, SampleWindow
 from .errors import ExecutorStopped
 from .wire import validate_result
+from .monitor import ResourceMonitor
+from .tasks import TaskSpec
 
 
 class Runtime:
@@ -23,6 +25,7 @@ class Runtime:
         self.events = EventLog(self.options.event_capacity)
         self.counters = Counters()
         self.task_times = SampleWindow(self.options.event_capacity)
+        self._monitor = ResourceMonitor()
         self._started_at = None
         self._closed = False
         self.n = executors
@@ -44,6 +47,7 @@ class Runtime:
         self.events.record("starting", executors=self.n)
         self._out = self._ctx.Queue()
         try:
+            self._monitor = ResourceMonitor().start()
             for i in range(self.n):
                 q = self._ctx.Queue(maxsize=self.options.queue_capacity)
                 p = self._ctx.Process(target=work, args=(i, q, self._out, self.options.to_dict()))
@@ -128,6 +132,14 @@ class Runtime:
     def submit(self, executor, script, data, task_id=None):
         return self._do("send", executor, script, data, task_id)
 
+    def submit_task(self, executor, task):
+        if not isinstance(task, TaskSpec):
+            raise TypeError("task must be TaskSpec")
+        return self.submit(executor, task.script, task.data, task.task_id)
+
+    def resource_usage(self):
+        return self._monitor.snapshot()
+
     def receive(self, timeout=None):
         if self._out is None:
             raise RuntimeError("Start the runtime first")
@@ -158,6 +170,7 @@ class Runtime:
     def inspect(self):
         import time
         d = {"executors": self.executor_info(), "counters": self.counters.snapshot()}
+        d["resources"] = self.resource_usage()
         d["events"] = self.events.summary()
         d["task_time_window"] = self.task_times.snapshot()
         d["options"] = self.options.to_dict()
@@ -218,6 +231,8 @@ class Runtime:
         self._q.clear()
         self._out = None
         self._closed = True
+        if self._monitor.snapshot()["running"]:
+            self._monitor.stop()
         self.events.record("stopped")
 
     def __enter__(self):

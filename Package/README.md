@@ -9,10 +9,10 @@ limits.
 ## Install
 
 Requires Python 3.11 or newer. Windows 10/11 supports the resource-controlled
-launcher. Install from this directory:
+launcher. Install from your configured package index:
 
 ```powershell
-python -m pip install .
+python -m pip install workframe==0.4.0
 ```
 
 For development, see [CONTRIBUTING.md](CONTRIBUTING.md). After setup, use
@@ -57,7 +57,7 @@ remote traceback details. Keep process creation behind a main guard.
 ## Resource-controlled execution
 
 ```powershell
-python -m workframe.launcher --cpu-percent 25 --memory-mb 512 --timeout 120 --report reports/run.json driver.py
+python -m workframe.launcher --cpu-percent 25 --memory-mb 512 --timeout 120 driver.py
 ```
 
 The CPU cap and committed-memory budget cover the driver and its descendants
@@ -78,3 +78,30 @@ Counters, Stopwatch, and bounded timing samples support application diagnostics.
 Scheduling policy and workload interpretation belong to the calling application.
 For API usage, development commands, report interpretation, and troubleshooting,
 see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+
+## In-memory resource counters
+
+```python
+from workframe import ResourceMonitor
+
+with ResourceMonitor() as resources:
+    # Execute your program's work here.
+    print(resources.snapshot())
+print(resources.snapshot())  # Frozen final measurements.
+```
+
+Every Runtime also exposes resource_usage(), and inspect() includes the same
+in-memory observations. Counters include elapsed seconds, observed CPU time,
+machine-normalized average CPU percentage, current memory, sampled peak memory,
+and process count. No report files are created by these APIs.
+
+The monitor samples the current process and descendants. Short-lived processes
+and allocation spikes can fall between samples; access errors are exposed in
+snapshots. Windows reports private committed memory, while other systems fall
+back to RSS. These observations do not enforce budgets: the package's Windows
+launcher provides hard limits and OS-maintained job accounting. Its report file
+is optional; omit --report to print a summary without creating a file.
+
+TaskSpec captures a Python file and a JSON-owned copy of task inputs. Submit it
+with runtime.submit_task(executor, spec), or continue using submit directly.

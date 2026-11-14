@@ -15,6 +15,7 @@ reports/
 # Keep the small shared sample tables; regenerate larger workloads locally.
 /Exercise/data/*
 !/Exercise/data/samples/
+!/Exercise/data/README.md
 
 /Artifacts/
 

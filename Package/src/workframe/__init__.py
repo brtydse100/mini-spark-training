@@ -9,9 +9,13 @@ from .errors import TaskError, ProtocolError, TaskLoadError, ExecutorStopped
 from .config import ExecutionOptions
 from .diagnostics import EventLog
 from .metrics import Stopwatch, Counters
+from .monitor import ResourceMonitor
+from .tasks import TaskSpec
 
 __all__ = [
     "Runtime",
+    "ResourceMonitor",
+    "TaskSpec",
     "TaskError",
     "ProtocolError",
     "TaskLoadError",

@@ -11,7 +11,7 @@ def main():
         runtime.submit(1, task, {"values": [3, 4]}, "b")
         for result in runtime.receive_many(2):
             print(result)
-        runtime.export_diagnostics("reports/runtime.json", "reports/events.jsonl")
+        print(runtime.resource_usage())
         print(runtime.inspect()["task_time_window"])
 
 

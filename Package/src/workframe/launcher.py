@@ -1,4 +1,4 @@
-"""Run a local driver under one enforced budget and write a JSON report."""
+"""Run a local driver under one enforced budget with optional JSON reporting."""
 import argparse
 import math
 import sys
@@ -23,7 +23,7 @@ def main(argv=None):
     parser.add_argument("--cpu-percent", type=positive)
     parser.add_argument("--memory-mb", type=int)
     parser.add_argument("--timeout", type=positive)
-    parser.add_argument("--report", type=Path, default=Path("reports/run.json"))
+    parser.add_argument("--report", type=Path, help="Optional path for a JSON report")
     parser.add_argument("script", type=Path)
     parser.add_argument("args", nargs=argparse.REMAINDER)
     args = parser.parse_args(argv)
@@ -95,8 +95,13 @@ def main(argv=None):
             child.wait(timeout=10)
             child.close()
         report["elapsed_seconds"] = time.perf_counter() - started
-        save_report(args.report, report)
-    print(f"{report['status']}: {report['elapsed_seconds']:.3f}s; report: {args.report}")
+        if args.report is not None:
+            save_report(args.report, report)
+    cpu = report.get("cpu_seconds", 0.0)
+    memory = report.get("peak_job_committed_bytes", 0)
+    print(f"{report['status']}: {report['elapsed_seconds']:.3f}s; CPU {cpu:.3f}s; peak committed {memory} bytes")
+    if args.report is not None:
+        print(f"Report: {args.report}")
     return code
 
 

@@ -4,17 +4,19 @@
 
 Build a local query engine over CSV tables using Workframe. A table can occupy one file or several files, with one external schema.json describing its columns and types.
 
-## 1. Prepare your environment
+Repository: [mini-spark-training on GitHub](https://github.com/brtydse100/mini-spark-training).
 
-- Create a virtual environment and install the provided Workframe wheel:
+## 1. Start with the package and data
+
+- Install the session's Workframe version using the package index provided:
 
 ```powershell
-python -m venv .venv
-./.venv/Scripts/python.exe -m pip install ./workframe-0.3.0-py3-none-any.whl
-./.venv/Scripts/python.exe -c "from importlib.metadata import version; print(version('workframe'))"
+python -m pip install workframe==0.4.0
 ```
 
-- Locate the supplied CSV tables and schema.json files. Read the CSV encoding, quoting, and null-marker rules. Use Python's csv module for record parsing.
+- Use the supplied CSV tables and schema.json files. Read the encoding, quoting,
+  and null-marker rules, and use Python's csv module for record parsing.
+- Create your own application; no supplied starter project or setup script is required.
 
 ## 2. Create your driver and executor tasks
 
@@ -35,10 +37,11 @@ python -m venv .venv
 - Run through the built-in timer and shared resource manager:
 
 ```powershell
-./.venv/Scripts/python.exe -m workframe.launcher --cpu-percent 25 --memory-mb 512 --timeout 120 --report reports/run.json driver.py
+python -m workframe.launcher --cpu-percent 25 --memory-mb 512 --timeout 120 driver.py
 ```
 
 - Use the assigned budget; these values are examples. The driver and all executors share one CPU/memory allowance. Record elapsed time, CPU time, and peak committed memory.
+- Read timing, CPU, and memory counters directly through runtime.resource_usage() or ResourceMonitor; saving a file is optional.
 - Bring your run command, results, and a task-flow explanation to the review. Verify behavior; writing automated tests is optional.
 
 If you feel stuck or encounter a problem with the exercise, ask your mentor for help.

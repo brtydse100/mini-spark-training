@@ -1,48 +1,40 @@
 # Mini Spark Training
 
-A two-week local Python exercise for developers familiar with OOP and SOLID.
-Trainees build an CSV query engine using Workframe, then extend their engine
-with partitioning and lazy evaluation while investigating dependency behavior.
+## Repository layout
 
-## Folders
+- [Package](Package/README.md): Workframe, a standalone Python library with source,
+  examples, public tests, resource monitoring, and CI package builds.
+- **Exercise/data**: supplied CSV tables and external schema.json files.
+- **Exercise/confluence**: three concise pages to copy into Confluence.
+- **Exercise/stages**: complete briefs for stages [1](Exercise/stages/stage-1.md),
+  [2](Exercise/stages/stage-2.md), and optional [3](Exercise/stages/stage-3.md).
 
-- [Package](Package/README.md): Workframe, a standalone local Python task library.
-- [Exercise](Exercise/README.md): assignments, CSV data, JSON schemas, starter
-  application, and data generator.
-- [Instructor Guide](Instructor%20Guide/00%20-%20START%20HERE.md): solution
-  approaches, defect map, reference tools, assessment, and private author checks.
+No separate instructor-guide folder, private verification suite, application
+starter, or exercise setup scripts are required.
 
-Only the outer exercise materials describe the educational setup. The library
-has ordinary project documentation, its own package metadata, examples, and
-public tests. Do not distribute the Instructor Guide to trainees.
+## Starting the exercise
 
-## Setup
-
-From the repository root in PowerShell:
+Give trainees the pages, CSV data/schema, and the session's package index details:
 
 ```powershell
-./Exercise/setup.ps1
-./Package/scripts/check.ps1
-./Package/.venv/Scripts/python.exe -m pytest 'Instructor Guide/Verification' -q
+python -m pip install workframe==0.4.0
 ```
 
-The instructor checks expect 24 passing checks and four strict expected failures
-that reproduce the planted defects. Workframe's own tests cover ordinary use;
-the private checks capture the exercise-specific failure scenarios.
+The command assumes your package index is configured; this repository does not
+publish to public PyPI automatically. Trainees write their own application.
+The first Confluence page includes the existing GitHub repository URL.
 
-The built-in timer and Windows Job Object manager enforce one shared CPU and
-committed-memory budget for the driver and its executors. Everything executes
-locally after dependency installation. Pilot the schedule and calibrate limits
-before assigning performance thresholds.
+Workframe exposes elapsed time, CPU, and process-tree memory directly in memory
+through ResourceMonitor and Runtime.resource_usage(). No report file is required.
+The built-in Windows launcher enforces the shared CPU/committed-memory budget
+and can optionally save a report when --report is provided.
 
+## Package artifacts and checks
 
-## Page drafts and package downloads
+The Build Python package workflow runs on pull requests, main, and manual
+requests. It tests the normal library interface, builds source/wheel artifacts,
+verifies an installed wheel in a clean environment, and provides downloads.
+PR builds get development versions. You manage registry publication.
 
-Three concise trainee-facing page drafts are in Exercise/confluence. They are
-ready to copy into Confluence; no Confluence pages have been published by this
-repository setup.
-
-The Build Python package GitHub Actions workflow runs on pull requests and main.
-Completed runs provide verified wheel/source artifacts and reports. Pull requests
-receive development wheel versions; main keeps the checked-in release version.
-Registry publication is not performed automatically.
+Library tests can run on a developer/trainee machine or in CI. They are normal
+package tests rather than a separate instructor tool collection.

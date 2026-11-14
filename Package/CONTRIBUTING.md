@@ -146,10 +146,25 @@ main, and manual dispatch. It tests the public library interface, builds source
 and wheel distributions, verifies the installed wheel in a fresh environment,
 and uploads the artifacts for 14 days.
 
-Pull request wheels use development versions such as 0.3.0.dev42, derived from
+Pull request wheels use development versions such as 0.4.0.dev42, derived from
 the checked-in release version and workflow run number. Version changes happen
 only in the CI checkout. Main builds retain the version in pyproject.toml.
 Artifacts include build identity and verification reports. Find them under the
 completed workflow run's Artifacts section, download and extract the archive,
 then install the desired wheel using python -m pip install PATH_TO_WHEEL.
 No registry upload or GitHub Release is performed automatically.
+
+
+## Process-tree observations
+
+ResourceMonitor is part of Workframe and keeps its counters in memory. Runtime
+starts/stops one automatically; resource_usage() reads it during or after a run.
+Use the context manager directly to observe a broader application scope.
+Snapshots explicitly identify sampled peaks and inaccessible process observations.
+They do not promise the exact lifetime CPU of processes that terminate between
+samples. Use Windows job accounting for whole-job enforcement/accounting.
+
+No files are required by ResourceMonitor or Runtime.resource_usage(). The
+launcher prints a summary by default and writes JSON only with explicit --report.
+TaskSpec, process-tree sampling, and resource monitoring are generic facilities;
+applications retain ownership of workload parsing and scheduling.
