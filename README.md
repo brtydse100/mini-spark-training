@@ -26,7 +26,7 @@ From the repository root in PowerShell:
 ./Package/.venv/Scripts/python.exe -m pytest 'Instructor Guide/Verification' -q
 ```
 
-The instructor checks expect 23 passing checks and four strict expected failures
+The instructor checks expect 24 passing checks and four strict expected failures
 that reproduce the planted defects. Workframe's own tests cover ordinary use;
 the private checks capture the exercise-specific failure scenarios.
 
@@ -34,3 +34,15 @@ The built-in timer and Windows Job Object manager enforce one shared CPU and
 committed-memory budget for the driver and its executors. Everything executes
 locally after dependency installation. Pilot the schedule and calibrate limits
 before assigning performance thresholds.
+
+
+## Page drafts and package downloads
+
+Three concise trainee-facing page drafts are in Exercise/confluence. They are
+ready to copy into Confluence; no Confluence pages have been published by this
+repository setup.
+
+The Build Python package GitHub Actions workflow runs on pull requests and main.
+Completed runs provide verified wheel/source artifacts and reports. Pull requests
+receive development wheel versions; main keeps the checked-in release version.
+Registry publication is not performed automatically.

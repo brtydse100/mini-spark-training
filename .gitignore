@@ -17,3 +17,5 @@ reports/
 !/Exercise/data/samples/
 
 /Artifacts/
+
+/.ci-tools/

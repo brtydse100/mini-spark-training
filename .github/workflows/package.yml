@@ -1,0 +1,54 @@
+name: Build Python package
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: package-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  wheel:
+    name: Build and verify Workframe wheel
+    runs-on: windows-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: Package
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      - name: Set build identity
+        id: identity
+        run: python tools/ci_metadata.py
+      - name: Install build dependencies
+        run: python -m pip install -e ".[dev]"
+      - name: Run library tests
+        run: python -m pytest tests -q
+      - name: Build source distribution
+        run: python -m build --sdist
+      - name: Build and verify installed wheel
+        run: python tools/verify_wheel.py
+      - name: Upload verified package
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ${{ steps.identity.outputs.name }}-${{ steps.identity.outputs.version }}-${{ github.sha }}
+          path: |
+            Package/dist/*.whl
+            Package/dist/*.tar.gz
+            Package/reports/build-metadata.json
+            Package/reports/wheel-check.json
+            Package/reports/wheel-runtime.json
+          if-no-files-found: error
+          retention-days: 14

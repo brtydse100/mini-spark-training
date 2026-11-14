@@ -30,3 +30,16 @@ Run your driver through the library's built-in timer and shared resource manager
 The driver is initially unimplemented. Use Package/examples/local_driver.py for
 installation verification. The mentor controls the assessed budget and releases
 stage two after review. Keep the sibling Instructor Guide private from trainees.
+
+
+## Concise page drafts
+
+Three trainee-facing Confluence page drafts are available under confluence/:
+part one (driver and queries), part two (partitioning and lazy evaluation), and
+optional part three (grouped processing). Copy their contents into Confluence
+and release each part after its review. The drafts contain task requirements
+and a final help reminder.
+
+The provided wheel can come from the repository's Build Python package workflow:
+open a completed run, download its package artifact, and extract the wheel.
+Use the actual wheel filename/version supplied for your session.

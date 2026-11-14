@@ -65,7 +65,7 @@ From Package:
 ./.venv/Scripts/python.exe -m pytest '../Instructor Guide/Verification' -q
 ```
 
-Expected starter result: 23 passed and 4 xfailed. The expected failures document intentional bugs. Instructor conftest points at this Desktop copy, not the original scratch workspace.
+Expected starter result: 24 passed and 4 xfailed. The expected failures document intentional bugs. Instructor conftest points at this Desktop copy, not the original scratch workspace.
 
 ## Reference count
 

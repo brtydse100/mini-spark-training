@@ -16,3 +16,13 @@ The numbered documents are the explanations/answers. Reference/instructor contai
 The reference files are not a complete finished trainee engine. The guide explains how to build one; it does not hand trainees a solved parallel query engine. A human pilot is still needed to validate the ten-day schedule and performance thresholds.
 
 Give trainees the sibling Package and Exercise folders, keeping this Instructor Guide private. Workframe documentation intentionally contains no teaching labels; educational context belongs in Exercise. Release the stage-two brief separately after their first review.
+
+
+For concise trainee-facing Confluence pages, use the three drafts in the sibling
+Exercise/confluence folder. These are drafts for copying into Confluence, not
+published pages. They intentionally omit instructions about changing Workframe.
+The full diagnosis and repair notes remain in this instructor folder.
+
+Package CI builds verified wheel artifacts on GitHub pull requests and main.
+The initial release in Git remains workframe 0.3.0. Registry setup is your choice;
+no local registry server is part of this repository setup.

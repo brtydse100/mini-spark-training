@@ -137,3 +137,19 @@ than after every source edit.
 - Memory errors: include runtime, queues, inputs, outputs, and workers in the budget.
 - Job assignment errors: inspect inherited Windows process restrictions. The
   launcher does not silently fall back to an unlimited run.
+
+
+## Pull request package builds
+
+The repository's Build Python package workflow runs on pull requests, pushes to
+main, and manual dispatch. It tests the public library interface, builds source
+and wheel distributions, verifies the installed wheel in a fresh environment,
+and uploads the artifacts for 14 days.
+
+Pull request wheels use development versions such as 0.3.0.dev42, derived from
+the checked-in release version and workflow run number. Version changes happen
+only in the CI checkout. Main builds retain the version in pyproject.toml.
+Artifacts include build identity and verification reports. Find them under the
+completed workflow run's Artifacts section, download and extract the archive,
+then install the desired wheel using python -m pip install PATH_TO_WHEEL.
+No registry upload or GitHub Release is performed automatically.
