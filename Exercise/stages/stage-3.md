@@ -28,4 +28,6 @@ Add grouped counting across the CSV table, for example counting people by countr
 - Explain your partitioning, redistribution, and result-combination responsibilities.
 - Report timing and resource use, and discuss the tradeoffs you observed.
 
+- If you attempt this part, create **grouped-processing.drawio** showing partitions, intermediate key/count routing, reducers, and final result collection, with process/message boundaries. Bring the editable file to review.
+
 If you feel stuck or encounter a problem with the exercise, ask your mentor for help.

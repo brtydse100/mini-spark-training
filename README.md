@@ -9,8 +9,12 @@
 - **Exercise/stages**: complete briefs for stages [1](Exercise/stages/stage-1.md),
   [2](Exercise/stages/stage-2.md), and optional [3](Exercise/stages/stage-3.md).
 
-No separate instructor-guide folder, private verification suite, application
-starter, or exercise setup scripts are required.
+- [Exercise/mentor](Exercise/mentor/README.md): phase answers, diagram-review
+  criteria, mentor questions, and manual acceptance checks. Keep these notes
+  separate from the pages/data given to trainees.
+
+No separate setup process, private verification suite, or application starter
+is required. Mentors review demonstrations on the trainee's machine.
 
 ## Starting the exercise
 

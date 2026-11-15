@@ -31,4 +31,6 @@ Using syntax of your own design, apply age >= 18, then age < 30, then count.
 - Compare with your part-one implementation and explain the effect of partition size and executor count.
 - Bring correct results, measurement evidence, and a clear explanation of your responsibilities and design decisions to the final review.
 
+- Create **workframe-internals.drawio** explaining the package itself: the relevant modules/functions, process boundaries, task submission, execution, result/error collection, lifecycle, and resource observation/enforcement. Trace one real task through it and bring the editable file to review.
+
 If you feel stuck or encounter a problem with the exercise, ask your mentor for help.

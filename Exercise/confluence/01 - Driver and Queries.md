@@ -44,4 +44,6 @@ python -m workframe.launcher --cpu-percent 25 --memory-mb 512 --timeout 120 driv
 - Read timing, CPU, and memory counters directly through runtime.resource_usage() or ResourceMonitor; saving a file is optional.
 - Bring your run command, results, and a task-flow explanation to the review. Verify behavior; writing automated tests is optional.
 
+- Create **architecture.drawio** for the application architecture you chose. Show its components, driver/executor process boundaries, CSV/schema inputs, JSON task/results, and count/show output. Bring the editable file to review and make sure it reflects your implementation.
+
 If you feel stuck or encounter a problem with the exercise, ask your mentor for help.
