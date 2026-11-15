@@ -5,15 +5,18 @@ These pages contain answers and review instructions. Give trainees the stage bri
 | Review | Trainee brief | Mentor answers | Diagram to bring |
 | --- | --- | --- | --- |
 | Stage 1: working queries | [Stage 1](../stages/stage-1.md) | [Stage 1 guide](phase-1.md) | architecture.drawio |
-| Stage 2: partitioning and laziness | [Stage 2](../stages/stage-2.md) | [Stage 2 guide](phase-2.md) | workframe-internals.drawio |
-| Stage 3: optional shuffle | [Stage 3](../stages/stage-3.md) | [Stage 3 guide](phase-3.md) | grouped-processing.drawio |
+| Part 1.5: package walkthrough | [Part 1.5](../stages/stage-1.5.md) | [Part 1.5 guide](phase-1.5.md) | workframe-internals.drawio |
+| Stage 2: partitioning and laziness | [Stage 2](../stages/stage-2.md) | [Stage 2 guide](phase-2.md) | Update the part-1.5 diagram as needed |
+| Stage 3: AI-assisted aggregation and UI | [Stage 3](../stages/stage-3.md) | [Stage 3 guide](phase-3.md) | stage-3-architecture.drawio |
 
 ## Before the exercise
 
 1. Supply the configured package-index details, Workframe version, CSV data, schemas, and trainee pages. No application starter is required.
 2. Assign one total CPU/memory budget and timeout for the driver and every descendant process together. Record the machine and settings used for comparisons.
 3. Prepare a stage-two assessment corpus: one large file, uneven multi-file input, and enough data to exceed the assigned memory allowance if fully loaded. Preserve schema/CSV validity. Establish expected results before assessment; the supplied 1,200-row samples alone cannot establish scalability.
-4. Schedule three working days for stage one and five for stage two, with a review day after each. Stage three is optional. Calibrate the ten-day target through a pilot, especially the broad expression scope.
+4. Schedule three working days for stage one, then one review day including part 1.5 (half to one day); stage two gets five days plus one review day. Stage three adds five days including its reviews: roughly three weeks overall. Calibrate through a pilot, especially expression breadth and spilling/UI scope.
+5. Keep stages one, 1.5, and two without AI. In stage three, trainees author the architecture and use Claude to generate implementation after mentor plan approval. Reserve separate plan and implementation reviews for aggregation and for the UI.
+6. Prepare small known-result sum/average cases, a high-cardinality spill workload, uneven tasks, and a controlled task-error scenario for stage three. Use the same shared budget for the engine and UI backend.
 
 ## Run each review
 
@@ -33,4 +36,4 @@ The package's Windows launcher enforces the shared CPU/committed-memory budget a
 - **Ready with follow-up:** required behavior works; record a small documentation/design improvement with an owner and review point.
 - **Needs another review:** correctness, required execution behavior, resource compliance, or understanding is missing. Record the failing case and the evidence needed next time.
 
-Use a short record: stage, code version, input/budget, observed results, diagram trace, decision, and follow-up. Do not make passing stage three a condition for completing the core exercise.
+Use a short record: stage, code version, input/budget, observed results, diagram trace, decision, and follow-up. Stage three is now part of the exercise; only recovery is a stretch task. Record its two plan reviews and two implementation reviews in stage-3-plan.md, with the final integrated demonstration.

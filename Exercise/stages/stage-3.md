@@ -1,43 +1,61 @@
-# Stage 3 - Optional grouped counting and shuffle
+# Stage 3 - Design and build with Claude
 
-**For early finishers only.** Complete the first two stages first. This extension is outside the required two-week assessment.
+**Time:** one full working week, including reviews. Complete stages one, 1.5, and two first. This is the third week of the exercise. Claude is allowed in this stage; the earlier parts remain without AI.
 
-**Goal:** Count rows by a column value, with executors combining contributions for each group.
+**Goal:** extend your engine with distributed aggregation and a live local monitoring UI. You own the architecture and verification; Claude helps generate the implementation.
 
-## 1. Add a grouped-count query
+## 1. Follow the cycle for each major feature
 
-Extend your query methods to express a grouped count. Choose your own syntax; for example:
+Complete this cycle separately for aggregation and the monitoring UI:
+
+1. **Plan:** write your design before asking Claude to generate implementation code. Describe responsibilities, interfaces/JSON messages, data flow, memory ownership, failure behavior, and how you will verify it. Include an editable draw.io architecture. You author and explain the decisions.
+2. **Review:** present the plan to your mentor. Agree on acceptance checks and resolve design issues before building that feature.
+3. **Build:** direct Claude in manageable tasks. Review generated changes, check behavior, and keep the design current. Bring significant architectural changes back for review before implementing them.
+4. **Review:** demonstrate the feature and its checks, trace the generated code, explain tradeoffs, and address findings before closing the feature.
+
+Use one short **stage-3-plan.md** with a section for each feature and an editable **stage-3-architecture.drawio** covering both. Record review decisions, significant changes, and a few examples of suggestions you corrected or rejected. You do not need to submit every chat message.
+
+## 2. Feature A: distributed aggregation
+
+Add grouped count, sum, and average to your lazy query methods. For example, using syntax of your own design:
 
 ```python
 people.group_by("country").count()
-# Sample result: {"IL": 300, "US": 300, "GB": 300, "DE": 300}
+# {"IL": 300, "US": 300, "GB": 300, "DE": 300} on the sample
+people.filter(adult_condition).group_by("country").sum("salary")
+people.group_by("country").average("salary")
 ```
 
-Define grouping-key types, null behavior, and the JSON result format. Existing filters must work before grouping. Query construction must remain lazy.
+- Apply filters before grouping. Document key types, null handling, empty results, and numeric precision.
+- Redistribute intermediate contributions so the executor responsible for a key combines all its contributions. This redistribution is the shuffle. The driver may coordinate transfers; it must not do every group's aggregation itself.
+- Keep aggregation state, pending transfers, and results bounded. Support intermediate data larger than the allowed in-memory state, using disk spilling/merging when necessary. Clean up temporary files on completion or failure.
+- Demonstrate both supplied layouts, different partition/executor counts, empty results, skewed keys, and many distinct keys. Compare small cases with a sequential calculation.
 
-## 2. Redistribute and combine intermediate results
+## 3. Feature B: live local monitoring UI
 
-The same country may appear in many input partitions. Its contributions must reach an executor responsible for combining them.
+Build a browser UI for your running engine, inspired by [Spark UI](https://spark.apache.org/docs/3.5.7/web-ui.html). Choose your UI tools. It must display real execution data, not simulated progress.
 
-- Produce intermediate key/count contributions from partitions.
-- Choose a consistent rule assigning each key to a destination executor.
-- Send contributions to their destinations, combine them there, and collect completed groups in the driver. This redistribution is the **shuffle**.
-- Bound aggregation state and transfer buffers under the assigned resource budget. Explain how you handle many distinct keys and heavily uneven groups.
+| View | Required information |
+| --- | --- |
+| Queries/jobs | Identity, description, running/completed/failed status, duration, task progress |
+| Execution plan | Operations, dependencies, and shuffle boundaries |
+| Tasks/partitions | Status, executor assignment, duration, rows processed, error details |
+| Executors | Alive/busy/idle state, completed tasks, available CPU/memory observations |
+| Shared resources | Assigned CPU/memory limits, elapsed time, aggregate CPU/memory observations |
 
-The driver may coordinate transfers; direct executor-to-executor communication is not required. Simply collecting all contributions and doing every group aggregation in the driver does not satisfy the distributed-grouping goal.
+An action such as count/show starts a job. Execution-plan steps are processing steps, not the numbered parts of this exercise.
 
-## 3. Demonstrate correctness
+- Update the UI while a query runs and retain its final status/details for review within a documented bounded history.
+- Design how execution events become UI state. Keep event queues, history, and refresh work bounded. Missing measurements must be shown as unavailable; distinguish per-executor samples from shared totals.
+- Display a task failure accurately and preserve a useful error. Automatic executor recovery is a stretch task, not required.
+- Keep execution correct if the browser is closed or reconnects. Run the UI backend and engine under the same aggregate resource allowance; include monitoring overhead in measurements.
 
-On the supplied sample, grouping by country must produce the four groups shown above, totaling 1,200. Filtering to country IL before grouping must produce only IL with count 300.
+## 4. Final integrated review
 
-Check both file layouts, several partition/executor counts, empty results, and heavily uneven groups. Compare small examples against a sequential calculation. Explain why no contribution is lost or counted twice and why each key reaches the same destination across processes.
+Bring your code/run commands, plan with review outcomes, editable diagram, correctness evidence, and resource measurements. Automated tests are optional; demonstrated verification is required.
 
-## 4. Bring to review
+Run a query long enough to observe progress, then use the UI to identify uneven work. Run a task that fails and explain its state/error from UI to engine code. Demonstrate that aggregation results remain correct and execution stays bounded with monitoring enabled. Compare elapsed time/resources with monitoring disabled using the same query/data/budget.
 
-- Your grouped query, task inputs/results, run command, and timing/resource measurements.
-- An explanation of routing, intermediate buffering, aggregation ownership, and observed tradeoffs.
-- An editable **grouped-processing.drawio** tracing partitions, intermediate key/count messages, destination executors, and final results, with process boundaries.
-
-**Complete:** grouped answers are correct, combination happens across executors, execution remains lazy and bounded, and you can explain the data movement in your code and diagram.
+**Complete:** both features passed their plan and implementation reviews, grouped results are correct, the UI reflects real execution, resource usage stays bounded, and you can explain and take responsibility for the Claude-generated code.
 
 If you feel stuck or encounter a problem with the exercise, ask your mentor for help.

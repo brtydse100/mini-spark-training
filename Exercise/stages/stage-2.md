@@ -1,6 +1,6 @@
 # Stage 2 - Partition work and execute queries lazily
 
-**Time:** 5 working days, then a final mentor review. Continue with your stage-one application and the same assigned total CPU/memory budget.
+**Time:** 5 working days, then a mentor review. Complete part 1.5 first and continue without AI with your stage-one application and the same assigned total CPU/memory budget.
 
 **Goal:** Handle uneven and large inputs efficiently, and run two chained filters in one pass when an action is requested.
 
@@ -50,14 +50,10 @@ Demonstrate the checkpoint with different partition sizes and executor counts, b
 
 Compare your stage-one and stage-two implementations on the same machine, input, query, and resource budget. Include startup, reading, partition preparation, execution, and shutdown. Record elapsed time, CPU time, peak memory, task count, and executor activity. Explain idle time and overhead; partitioning need not make the small sample faster.
 
-## 5. Explain the package and bring to review
+## 5. Bring to review
 
-Create an editable **workframe-internals.drawio** about Workframe itself. Stage one's diagram describes your application; this diagram explains the package code used by it.
+Bring your code/run command, partitioning decisions, one-pass counter evidence, and timing/resource comparison. Update your part-1.5 workframe-internals.drawio if the code or your understanding changed; use it to explain relevant execution behavior. A second package diagram is not required.
 
-Show actual relevant module/function names and trace one task through process startup, submission, JSON transport, task-file execution, result/error collection, and shutdown. Include process boundaries, task-state ownership, and where resource observation and enforcement happen. Be ready to open the code locations shown and explain their behavior.
-
-Bring your code/run command, partitioning decisions, one-pass counter evidence, timing/resource comparison, and diagram.
-
-**Complete:** results remain correct, query construction is lazy, count satisfies the one-pass checkpoint, large/uneven work stays within the budget, and you can explain both your application and Workframe's execution flow. Automated tests are optional; demonstrated behavior is required.
+**Complete:** results remain correct, query construction is lazy, count satisfies the one-pass checkpoint, large/uneven work stays within the budget, and you can explain both your application and Workframe's execution flow. Automated tests are optional; demonstrated behavior is required. After this review, continue to the AI-assisted stage three.
 
 If you feel stuck or encounter a problem with the exercise, ask your mentor for help.

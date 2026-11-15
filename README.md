@@ -5,9 +5,10 @@
 - [Package](Package/README.md): Workframe, a standalone Python library with source,
   examples, public tests, resource monitoring, and CI package builds.
 - **Exercise/data**: supplied CSV tables and external schema.json files.
-- **Exercise/confluence**: three concise pages to copy into Confluence.
+- **Exercise/confluence**: four trainee pages to copy into Confluence (1, 1.5, 2, 3).
 - **Exercise/stages**: complete briefs for stages [1](Exercise/stages/stage-1.md),
-  [2](Exercise/stages/stage-2.md), and optional [3](Exercise/stages/stage-3.md).
+  [1.5](Exercise/stages/stage-1.5.md), [2](Exercise/stages/stage-2.md), and
+  [3](Exercise/stages/stage-3.md).
 
 - [Exercise/mentor](Exercise/mentor/README.md): phase answers, diagram-review
   criteria, mentor questions, and manual acceptance checks. Keep these notes
@@ -15,6 +16,20 @@
 
 No separate setup process, private verification suite, or application starter
 is required. Mentors review demonstrations on the trainee's machine.
+
+## Exercise progression
+
+Plan for roughly three full-time weeks:
+
+1. Build driver/executor filter, count, and show (three days plus application review).
+2. Complete part 1.5: read Workframe and create its package diagram (within the first review day).
+3. Add partitioning and lazy one-pass execution (five days plus review).
+4. Use Claude to build distributed aggregation and a live local monitoring UI (five days including reviews).
+
+Parts 1, 1.5, and 2 are without AI. In stage 3, trainees own the architecture and
+follow plan -> mentor review -> build with Claude -> mentor review for each of
+the two major features. The UI displays real job/task/executor/resource data.
+Recovery is a stretch task; aggregation and monitoring are required.
 
 ## Starting the exercise
 

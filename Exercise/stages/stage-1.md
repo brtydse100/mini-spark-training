@@ -70,6 +70,6 @@ Bring:
 - Demonstrations on both file layouts: total count 1,200, Alice count 300, filtered show, no matches, nulls, multiline fields, and understandable invalid-input errors. Demonstrate each supported expression family.
 - An editable **architecture.drawio** showing your chosen application components, driver/executor process boundaries, CSV/schema inputs, JSON task/results, and count/show output. Trace one query through it and keep it consistent with your code.
 
-**Ready for stage 2:** your results are correct on both layouts, show respects its limit, executors shut down cleanly, and you can explain the design. Verify behavior yourself; an automated test suite is optional.
+**Ready for part 1.5:** your results are correct on both layouts, show respects its limit, executors shut down cleanly, and you can explain the design. Verify behavior yourself; an automated test suite is optional. Next, complete the package walkthrough in part 1.5.
 
 If you feel stuck or encounter a problem with the exercise, ask your mentor for help.

@@ -1,6 +1,6 @@
 # Stage 2 - Mentor answers and review
 
-**Read with:** [trainee stage-two brief](../stages/stage-2.md). **Target:** five working days plus review.
+**Read with:** [trainee stage-two brief](../stages/stage-2.md). **Target:** five working days plus review, after [part 1.5](phase-1.5.md). Continue without AI.
 
 **Successful outcome:** bounded partitions keep executors productive; queries are lazy and independent; the two-filter count makes one source pass; the trainee understands the package code their application uses.
 
@@ -58,19 +58,9 @@ The long _do function and weak names/docs make ownership hard to follow. Look fo
 
 A correct application may avoid a particular faulty path. Do not force a poor scheduler just to trigger it; use a small reproduction during discussion. Judge diagnosis and a justified remedy. Ask what reproduces the defect, why the chosen layer owns the fix, and how they checked existing behavior afterward. Replacing Workframe with another engine misses the exercise's learning objective.
 
-## 4. Review workframe-internals.drawio
+## 4. Revisit the part-1.5 package trace
 
-This diagram explains the package, not the stage-one application. Ask for a real task trace with actual code locations:
-
-- [ ] Runtime/start, ExecutionOptions, and spawned executor processes.
-- [ ] submit or submit_task/TaskSpec, _do, JSON encoding, and input queues.
-- [ ] worker.work -> _pack -> loading.load -> the task's run(data).
-- [ ] Success/error encoding, result queue, receive, and TaskError propagation.
-- [ ] Outstanding/completed identities, retained data, ownership, and release.
-- [ ] close, sentinels, joins, and fallback termination.
-- [ ] ResourceMonitor/process_tree observation versus launcher/resources.Job enforcement/accounting.
-
-Review the code version actually used; repaired code may differ from the starter. Group helper modules where useful. Ask them to open code for an arrow in the diagram and explain both success and failure paths. A generic Spark picture is insufficient.
+The package diagram/code walkthrough was assessed in [part 1.5](phase-1.5.md). Reuse that file rather than assigning another diagram. Ask the trainee to update changed paths and trace the state/ownership affected by their stage-two work or repairs. Use the detailed part-1.5 checklist only where relevant to the changes.
 
 ## 5. Check scale/resources and decide
 
@@ -78,4 +68,4 @@ Use the prepared large and uneven inputs, including a single file using multiple
 
 Compare stage one and stage two on the same machine/input/query/budget, including startup, reading, partition preparation, execution, and shutdown. Record time, CPU, memory, task count, and idle activity. A small sample can get slower because of overhead; do not require an arbitrary speedup. The resource monitor cannot prove row-scan counts.
 
-**Ready:** correct results, independent lazy plans, one-pass evidence, bounded large/uneven execution, and an explainable package diagram/code trace. **Needs another review:** eager record scans, hidden preprocessing passes, unbounded queues/history/results, stale answers, or unexplained package behavior. Automated tests are optional; behavioral evidence and justified changes are required.
+**Ready:** correct results, independent lazy plans, one-pass evidence, bounded large/uneven execution, and an explainable package diagram/code trace. **Needs another review:** eager record scans, hidden preprocessing passes, unbounded queues/history/results, stale answers, or unexplained package behavior. Automated tests are optional; behavioral evidence and justified changes are required. After passing, begin the AI-assisted stage three.

@@ -67,10 +67,12 @@ Require the editable file to match their code. Ask them to trace one filter/coun
 - [ ] Conversion, filtering, aggregation/formatting, error handling, and shutdown.
 - [ ] Where timing/resource observation and the shared budget apply.
 
-Ask: ?Where does filtering run?? A good answer names the executor task and expression handling. Ask: ?What happens when tasks finish out of order?? A good answer explains identity-based collection. Ask: ?Why these responsibilities?? Look for reasons tied to changes they expect, not only pattern names.
+Ask: "Where does filtering run?" A good answer names the executor task and expression handling. Ask: "What happens when tasks finish out of order?" A good answer explains identity-based collection. Ask: "Why these responsibilities?" Look for reasons tied to changes they expect, not only pattern names.
 
 ## 4. Check resources and decide
 
 Run their driver through the built-in launcher under the assigned aggregate budget. Record command, elapsed time, CPU time, and peak committed memory. Confirm measurements include the driver and executors; creating more executors gives no extra allowance. In-memory observations are useful, but do not replace enforcement.
 
 **Ready:** correct filter/count/show, both layouts, explicit schema/comparison rules, bounded show results, controlled lifecycle/resources, and an explainable diagram. **Needs another review:** wrong counts, broken CSV records, collecting all show results, orphaned processes, or inability to explain their own execution. Missing automated tests alone is not a failure.
+
+After the application review, complete the [part-1.5 package walkthrough](phase-1.5.md) before stage two.
