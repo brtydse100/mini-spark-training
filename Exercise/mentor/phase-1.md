@@ -1,86 +1,76 @@
-# Phase 1: answers and mentor checks
+# Stage 1 - Mentor answers and review
 
-## Intended outcome
+**Read with:** [trainee stage-one brief](../stages/stage-1.md). **Target:** three working days plus review.
 
-A working driver creates executors and implements filter, count, and show over
-one or several CSV files sharing an external schema. Trainees implement the
-application; Workframe supplies generic execution/transport facilities.
+**Successful outcome:** the trainee's driver uses Workframe executors to implement filter, count, and show over one-file and multi-file CSV tables with an external schema.
 
-## A sound solution
+## 1. Understand an acceptable solution
 
-Possible responsibilities are a table/input descriptor, schema converter,
-expression representation/evaluator, driver, task implementation, and result
-formatter. These need not be separate classes if another design has clear
-ownership and can evolve.
+Workframe owns process creation and JSON transport. The application owns source selection, schema conversion, expression evaluation, scheduling, result combination, and display. Look for clear ownership rather than a required number of classes.
 
-The driver resolves sources and schema, creates tasks, submits work, tracks
-identity, handles completions/errors, and closes executors. A whole-file task
-is acceptable initially. A table in one file need not use all executors yet.
+A valid execution is:
 
-The executor task file exposes run(data). It opens CSV with the schema encoding
-and newline="", validates/skips the header, interprets the reserved null token,
-converts values, evaluates predicates, and returns JSON-compatible results.
+1. The driver resolves files/schema and creates file tasks containing the requested operation and filter description.
+2. Workframe starts executor processes and loads the trainee's Python task file.
+3. Its run(data) reads logical CSV records with the declared settings, skips each header, applies null/type rules, and evaluates the filter.
+4. For count it returns a partial integer; for show it returns a bounded JSON-compatible row result.
+5. The driver associates completions with tasks, combines counts exactly once or formats rows with headers, and shuts down processes on success or failure.
 
 ```text
-partial_count = 0
-for each logical CSV record:
-    row = apply_schema(record)
-    if predicate(row):
-        partial_count += 1
-return partial_count
+executor count task:
+    matches = 0
+    for each logical CSV record after its header:
+        row = convert_using_schema(record)
+        if expression_matches(row):
+            matches += 1
+    return matches
+
+driver count action:
+    return sum(each completed task's partial count exactly once)
 ```
 
-The driver sums partial counts exactly once by task identity. For show, return
-bounded row batches and format them in the application with column headers.
-The application's query.show() is not a Workframe method or a method on a JSON
-dictionary. Completion order does not imply source order; require a documented
-ordering policy and a display limit.
+A structured JSON expression tree is one acceptable way to represent comparisons and nested AND/OR/NOT. A SQL text parser is not required. Whole-file tasks and an eager implementation are acceptable here; do not demand stage-two partitioning or laziness. A single-file table need not use all executors yet, but multi-file execution must demonstrate multiple executor processes.
 
-A structured expression such as a comparison node containing a column reference
-and literal can be serialized to JSON and evaluated inside the task. Nested
-AND/OR/NOT expressions provide composition. A SQL text parser is not required.
+show belongs to the application, not Workframe or the result dictionary. Limit rows returned and collected; displaying five rows after collecting every match is insufficient. Accept a documented ordering policy rather than assuming completion order equals source order. Decimal values need an explicit JSON representation preserving their intended precision.
 
-## What to look for in architecture.drawio
+## 2. Run correctness checks
 
-- [ ] The chosen application components and their actual responsibilities.
-- [ ] A clear boundary between application code and Workframe.
-- [ ] Driver and executor process boundaries; queues/transport where used.
-- [ ] CSV files, schema, task Python files, JSON inputs, and returned results.
-- [ ] A trace from query request to task execution to count/show output.
-- [ ] Ownership of conversion, filtering, aggregation, errors, and shutdown.
-- [ ] Where resource measurement and the shared budget apply.
+Ask the trainee to predict, then run these checks on both supplied layouts:
 
-Ask for the diagram early enough to discuss their intended architecture, then
-require the review version to match the implementation. Do not demand specific
-class names, a particular UML notation, or a diagram of every helper function.
+| Query | Expected result |
+| --- | --- |
+| Count all rows | 1,200 |
+| name equals Alice | 300 |
+| country in IL/US | 600 |
+| active equals true | 800 |
+| age is null | 71 |
+| note is null | 110 |
+| name equals a value absent from the table | 0 |
 
-## Cases to run on the trainee's application
+Then check behavior rather than only totals:
 
-For the supplied unmodified sample, both single and multiple layouts should give:
+- [ ] show(5) displays at most five qualifying rows with headers; an empty result is well-formed. Explain its ordering and inspect how many rows are retained.
+- [ ] Headers are excluded in every file. Quoted commas, doubled quotes, Unicode, and multiline fields stay intact.
+- [ ] The reserved null marker differs from empty text. A valid header-only CSV returns count zero.
+- [ ] Unknown columns and malformed typed values produce understandable errors. A failed executor task identifies its task and does not leave the run hanging.
+- [ ] Start and finish several tasks, including tasks completing in a different order. Confirm results are associated correctly and processes close.
 
-- [ ] Unfiltered count: 1,200; name equal to Alice: 300.
-- [ ] Country in IL/US: 600; active equal to true: 800.
-- [ ] Age is null: 71; note is null: 110.
-- [ ] Count excluding headers; identical answers across file layouts.
-- [ ] A nonexistent literal returns zero; show on no matches stays well-formed.
-- [ ] show(n) returns at most n qualifying rows and includes headers.
-- [ ] Quoted commas, quotes, Unicode, and embedded newlines remain in one field.
-- [ ] Empty input with a valid header is handled according to their contract.
-- [ ] Unknown columns and invalid values produce understandable errors.
+Cover each expression family from the brief using small, manually understandable rows. For example, with typed rows `(age=20, salary=10, name=Alice)` and `(age=35, salary=20, name=Bob)`: age >= 18 AND age < 30 selects only Alice; NOT(name = Alice) selects only Bob; salary * 2 >= 30 selects only Bob. Add membership, ranges, OR/grouping, contains/prefix/suffix/LIKE, and length checks. Check equality and comparison boundaries too. Use their documented case, wildcard, null, and invalid-operation rules; do not silently impose a different SQL dialect.
 
-Use equality/case/null examples consistently with the supplied schema and the
-trainee's documented permitted rules. Empty text and the reserved null marker
-must not be silently confused. Ask how decimals and non-JSON-native values are
-represented without losing intended precision.
+## 3. Review architecture.drawio and understanding
 
-## Questions and review decision
+Require the editable file to match their code. Ask them to trace one filter/count request and then show through:
 
-Ask them to trace one JSON task/result through their diagram and code; explain
-where an expression is evaluated; show how failures identify their task; and
-explain what happens when workers finish in a different order.
+- [ ] Application components and responsibilities, separated from Workframe.
+- [ ] Driver/executor process boundaries and transport direction.
+- [ ] CSV/schema inputs, task-file path, JSON input, completion identity, and result.
+- [ ] Conversion, filtering, aggregation/formatting, error handling, and shutdown.
+- [ ] Where timing/resource observation and the shared budget apply.
 
-Advance when count/filter/show are correct, schema and file layouts work,
-executor lifecycle is controlled, resources respect the assigned budget, and
-the trainee can explain the architecture. A wrong answer, unbounded collection
-for show, missing cleanup, or an unexplained diagram needs follow-up. Writing
-an automated test suite is optional; behavioral evidence is required.
+Ask: ?Where does filtering run?? A good answer names the executor task and expression handling. Ask: ?What happens when tasks finish out of order?? A good answer explains identity-based collection. Ask: ?Why these responsibilities?? Look for reasons tied to changes they expect, not only pattern names.
+
+## 4. Check resources and decide
+
+Run their driver through the built-in launcher under the assigned aggregate budget. Record command, elapsed time, CPU time, and peak committed memory. Confirm measurements include the driver and executors; creating more executors gives no extra allowance. In-memory observations are useful, but do not replace enforcement.
+
+**Ready:** correct filter/count/show, both layouts, explicit schema/comparison rules, bounded show results, controlled lifecycle/resources, and an explainable diagram. **Needs another review:** wrong counts, broken CSV records, collecting all show results, orphaned processes, or inability to explain their own execution. Missing automated tests alone is not a failure.

@@ -1,71 +1,58 @@
-# Phase 3: optional grouped processing - answers and mentor checks
+# Stage 3 - Mentor answers and review (optional)
 
-## Intended outcome
+**Read with:** [trainee stage-three brief](../stages/stage-3.md). Start only after the core exercise passes. Unfinished stage three must not delay core completion.
 
-This is for early finishers; it is outside the required two-week pass criteria.
-The trainee implements a grouped operation whose intermediate data must be
-redistributed across executors, while preserving lazy execution and the budget.
+**Successful outcome:** a lazy grouped-count query redistributes intermediate contributions and combines groups on executors under the assigned resource budget.
 
-## A sound solution
+## 1. Understand an acceptable solution
 
-For grouped counting, a map task can build local key/count pairs instead of
-sending every source row. Route each key consistently to its responsible
-reducer/executor, combine all contributions there, and send completed grouped
-results to the driver. This routing/transfer is the shuffle.
+For grouped counting, a map task can combine rows locally into key/count pairs. A consistent routing rule sends each key to its responsible reducer executor. That executor combines contributions, and the driver assembles finished groups.
 
 ```text
 map partition:       local_counts[key] += 1
-route intermediate: destination = stable_partition(key, reducer_count)
-reduce destination: grouped_count[key] += partial_count
-driver:              assemble completed grouped outputs
+route contribution:  destination = stable_partition(key, reducer_count)
+reduce destination:  grouped_count[key] += partial_count
+driver:              assemble completed group outputs
 ```
 
-The exact transport is a design choice. The driver can coordinate transfer;
-direct worker messages are not mandatory. It must still redistribute ownership
-of grouped work rather than collecting and aggregating everything centrally
-while merely calling that shuffle.
+Local combination reduces transfer versus sending every row. The driver may coordinate transfer; direct executor messages are not mandatory. Doing all group aggregation in the driver does not satisfy the distributed-grouping goal.
 
-Define key serialization/type/null rules consistently. Routing must be stable
-across executor processes. Do not assume Python's default string hash produces
-the same value in independently started interpreters. A deterministic digest
-of a canonical key representation is one valid choice, not a required design.
+Key serialization, types, and null handling need explicit rules. Routing must be consistent across processes. Python's default string hash may differ between independently started interpreters; a deterministic digest of a canonical key is one acceptable alternative.
 
-Bound local aggregation maps and transfer buffers. If many distinct keys exceed
-memory, batching or a documented spill strategy is needed for that workload.
-A single popular key can still concentrate work; ask them to explain skew
-rather than requiring a production optimizer.
+Aggregation maps, transfer queues, and returned results must fit the budget. High-cardinality inputs may need bounded batches or spill/merge. One popular key can still concentrate work. Ask for the limitation and their handling of the assessed workload; do not demand a production optimizer.
 
-## What to look for in grouped-processing.drawio
+## 2. Run correctness checks
+
+Use both supplied file layouts:
+
+| Query | Expected result, ignoring group display order |
+| --- | --- |
+| Group all rows by country and count | IL:300, US:300, GB:300, DE:300 |
+| Sum those group counts | 1,200 |
+| Filter country=IL, then group by country | Only IL:300 |
+| Filter to no matches, then group | No groups, following the declared empty-result format |
+
+- [ ] Change partition size and executor/reducer counts; results remain identical.
+- [ ] Trace contributions for one key spanning multiple partitions to one destination.
+- [ ] Compare a small hand-calculated or sequential example with their result.
+- [ ] Check that retry/replay, if supported, does not silently double-count contributions. Automatic retry support is not required.
+- [ ] Use skewed and many-distinct-key input to inspect buffers/state under the budget.
+- [ ] Construct the query without processing data, then execute; filters still work before grouping and shutdown remains clean.
+
+## 3. Review grouped-processing.drawio and questions
+
+Require an editable diagram matching the implementation:
 
 - [ ] Source partitions and map-side partial aggregation.
-- [ ] Key-to-destination routing, with process and message boundaries.
-- [ ] Intermediate key/count messages and their buffering/ownership.
-- [ ] Reducer execution, grouped output, and final driver collection.
-- [ ] Where skew or high cardinality creates pressure.
+- [ ] Key-to-executor routing rule, process boundaries, and message direction.
+- [ ] Intermediate key/count buffers and who owns them.
+- [ ] Reducer aggregation and finished group results collected by the driver.
+- [ ] Points where skew/high cardinality create pressure.
 
-Require the editable file only if phase three is attempted. A timing or network
-picture without the data-routing rule does not explain a shuffle.
+Ask: ?Why does every contribution for a key meet at the same executor?? A good answer explains stable routing and canonical keys. Ask: ?What reduces transfer?? Expect local combination. Ask: ?What happens with one popular key or many unique keys?? Expect discussion of concentrated work versus growing state, backed by their measurements.
 
-## Cases and expected results
+## 4. Check measurements and decide
 
-For unfiltered grouping by country on the supplied sample:
+Record the command, query, input, budget, time, CPU, and memory. Include redistribution and final combination in the timing. Inspect data movement and state ownership rather than accepting a label such as shuffle.
 
-```json
-{"IL": 300, "US": 300, "GB": 300, "DE": 300}
-```
-
-- [ ] One-file/multi-file layouts and partition/executor counts agree.
-- [ ] Group counts sum to the filtered count (1,200 for the unfiltered sample).
-- [ ] Empty input yields no groups or another explicitly documented empty result.
-- [ ] Filter country=IL before grouping yields just IL:300; use it to discuss skew.
-- [ ] Keys with zero contributions are not invented as source groups.
-- [ ] Input/partial-result replay is not silently counted twice.
-- [ ] Construction remains lazy, resources bounded, and shutdown clean.
-
-Use a simple hand-calculated or sequential result for small cases; no private
-verification program is needed. Ask why combining local counts reduces transfer,
-how destinations are chosen, and how work changes when one key dominates.
-
-Accept when correct distributed grouping, routing ownership, and bounded data
-movement are explained and demonstrated. Keep this extension optional; do not
-hold up a successful core exercise for unfinished advanced optimizations.
+**Complete:** correct grouped answers, executor-owned group combination, consistent routing, bounded execution, and an explainable diagram. **Needs follow-up:** driver-only aggregation, inconsistent routing, missing/duplicate contributions, or unbounded state. Keep the assessment proportional to this optional extension.

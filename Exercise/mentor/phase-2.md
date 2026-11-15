@@ -1,113 +1,81 @@
-# Phase 2: answers and mentor checks
+# Stage 2 - Mentor answers and review
 
-## Intended outcome
+**Read with:** [trainee stage-two brief](../stages/stage-2.md). **Target:** five working days plus review.
 
-The application handles larger uneven input through bounded partitions and
-effective work distribution. Query construction is lazy. Both filters in a
-chain run during one processing traversal. The trainee can explain the package
-internals they depend on, not just the application's interface.
+**Successful outcome:** bounded partitions keep executors productive; queries are lazy and independent; the two-filter count makes one source pass; the trainee understands the package code their application uses.
 
-## A sound solution
+## 1. Understand an acceptable solution
 
-A valid approach streams logical CSV records into bounded batches, submits a
-limited number of tasks, and replenishes work as executors finish. Keep pending
-input, active work, and returned batches bounded. A byte-range design is also
-valid if record boundaries, headers, encoding, and ownership are correct.
-Never assume every newline ends a record or every equal-row partition has equal
-cost. Include parsing, boundary discovery, and serialization in the budget.
+One valid design is a driver that streams logical CSV records into bounded batches, dispatches a bounded set of tasks, and replenishes work when executors finish. Executors convert/evaluate rows and return small partial counts or bounded show results. This is an example, not a required architecture.
 
-Query methods produce independent operation descriptions. An action compiles
-that description into tasks; building a plan does not consume source records.
-A branch must not mutate another query's operations.
+Byte-range partitions are also possible, but quoted newlines and multibyte encoding require correct boundaries. A pre-scan to find boundaries is another source traversal: it must be included in one-pass accounting. Equal row counts need not mean equal cost. Look for measured task sizes and low idle time rather than perfectly equal worker totals.
+
+Lazy query methods produce independent descriptions of operations. An action executes that description:
 
 ```text
-query = source + [age >= 18, age < 30]       # describe only
-on count:
-    for each bounded partition:
-        process each row once:
-            convert according to schema
-            if first_condition(row) and second_condition(row):
-                increment this partition's count
-    combine partition counts exactly once
+people = source description
+adults = people plus [age >= 18]
+young = adults plus [age < 30]      # no row processing or dispatch yet
+
+on young.count():
+    stream source once into bounded partitions
+    executor: convert each row; apply both predicates; count matches
+    driver: sum each task result exactly once
 ```
 
-There must be no complete intermediate table after the first filter. show runs
-the same predicates but can stop at its documented limit. Retain count as the
-full-scan checkpoint because show alone may inspect only a prefix.
+There is no complete intermediate table between the filters. Creating young must not alter adults or people. Repeated actions must remain correct; caching is not required. show is a separate action that may stop early, so it cannot prove the full-scan checkpoint.
 
-## What to look for in workframe-internals.drawio
+## 2. Run the lazy/one-pass checkpoint
 
-Require the diagram to reflect the package version/code actually used. Relevant
-components should carry real module/function names; group supporting modules
-where listing every helper would add noise.
+Use the supplied samples first, with instrumentation that counts actual reads and processing rather than inferred totals:
 
-- [ ] Runtime construction/start, ExecutionOptions, and process creation.
-- [ ] submit/submit_task, TaskSpec where used, _do, and input queues.
-- [ ] JSON encode/decode and the driver/executor process boundary.
-- [ ] worker.work -> _pack -> loading.load -> task-file run(data).
-- [ ] Success/error message creation, result queue, receive, and TaskError.
-- [ ] Pending/completed task state, identities, and who owns retained data.
-- [ ] close, sentinels, joins, and fallback process termination.
-- [ ] ResourceMonitor/process_tree observation versus launcher/resources.Job
-  enforcement/accounting; these have different roles and measurement scope.
-- [ ] A complete traced task, with message direction and data lifetime.
+| Review point | Expected evidence |
+| --- | --- |
+| Before and after constructing/branching queries | No increase in source data rows processed or processing tasks submitted; metadata reads are allowed |
+| After count with age >= 18 then age < 30 | Answer 200 in each layout; 1,200 logical source records read once for that action, including partition-preparation scans |
+| Inside executor processing | Both filters are applied in the same row-processing traversal; no second scan of a complete first-filter result |
+| After constructing young from adults | adults still represents only age >= 18; people remains unfiltered |
+| Repeated count / separate show(5) | Correct fresh action behavior; show displays at most five matches |
 
-Ask the trainee to follow a real task through the diagram and open the named
-code locations. A generic Spark picture or a copy of their stage-one application
-architecture is not sufficient. Observed behavior and assumptions should be
-distinguishable. The diagram should make the package's execution model clear.
+Counters from spawned processes need to reach the driver; reading only driver-local variables is insufficient. Ask where each counter increments and inspect the loop. If the second predicate short-circuits on rejected rows, its evaluation count may be lower; that is not evidence of missing rows. Reset or subtract counters per action.
 
-## Mentor-only package problems and answers
+Repeat with different partition sizes/executor counts and both file layouts. Run stage-one correctness/error checks again, especially multiline CSV, nulls, headers, empty results, and shutdown. A count of 200 alone does not prove the required execution behavior.
 
-The trainee-facing requirements intentionally do not tell them to modify the
-package. Assess their diagnosis when new workloads expose a problem. Do not
-force an inefficient application design just to trigger a particular path; use
-a focused reproduction if their valid architecture avoids it naturally.
+## 3. Review package failures and repairs (mentor only)
 
-- **Task tracking:** Runtime._do stores _x[executor] = task_id. Two submissions to
-  one executor before receiving overwrite the first identity. Receiving the first
-  result raises a mismatch. Track task identity independently with executor
-  ownership, validate the returning pair, and remove that exact active task.
-- **Stale results:** _done is consulted solely by ID at submission. Execute an ID
-  with input producing 1, then reuse the completed ID with input producing 9;
-  the starter can return 1 again. Remove implicit reuse or define explicit valid
-  cache/identity semantics; an ID alone is not a content-aware query cache.
-- **Retained input:** _history retains each serialized payload. Long sequential
-  runs grow retained memory despite bounded in-flight work. Release input after
-  ownership ends and retain only bounded diagnostic metadata. Reference release,
-  not immediate OS RSS reduction, is the key evidence.
-- **Type contracts:** settings.amount can return int, float, or str; pending and
-  empty batch results also vary in type. Normalize semantic capacities under a
-  clear contract, reject invalid/fractional values as appropriate, and return
-  consistent empty shapes. Do not coerce all user task data indiscriminately.
-- **Structure:** the long _do function mixes several responsibilities. Look for
-  targeted improvements that make ownership and transitions comprehensible,
-  while recognizing working modules that need no changes.
+The trainee pages do not announce dependency defects. When a problem appears, ask for the failing input, expected/actual behavior, and a trace to the responsible layer before suggesting changes. These are selected starter-0.4.0 defects; compare against the version they actually use.
 
-Useful repair criteria are task/result association, repeated-execution
-correctness, bounded ownership, clear accepted input types, preserved JSON/error
-contracts, and clean lifecycle behavior. No single reference architecture is
-mandatory, and replacing the entire dependency with another engine misses the
-learning objective.
+| Problem and focused reproduction | Cause in the starter | Acceptable repair direction |
+| --- | --- | --- |
+| Submit two tasks to one executor before receiving; first completion can raise an identity mismatch | Runtime._do replaces _x[executor] with the latest task ID | Track outstanding tasks and executor ownership independently; validate/remove the exact returning task |
+| Complete an ID with input yielding 1, then reuse that ID with input yielding 9; old result can return | Submission consults _done using only the ID | Remove implicit reuse or define explicit valid identity/cache rules; an ID alone is not content-aware caching |
+| Run many sequential tasks with substantial inputs; retained payloads grow despite bounded active work | _history keeps every serialized input | Release payload ownership when no longer needed; retain bounded diagnostics. Inspect retained references, not only immediate OS memory reduction |
+| Use different limit forms or inspect empty results; type-dependent behavior appears | settings.amount returns int/float/str; pending varies by state; empty submit_many returns 0 rather than a list | Define/validate capacity types and consistent result shapes; reject fractional/invalid limits as appropriate |
 
-## Cases to demonstrate
+For the type issue, ask them to compare limit=2, limit="2", limit=2.5, pending when empty/nonempty, and an empty batch. Do not normalize all task data to one type: user data legitimately contains different types.
 
-- [ ] age >= 18 then age < 30 gives 200 in both supplied file layouts.
-- [ ] Constructing/branching a query does not move source-record/task counters.
-- [ ] count executes both predicates in one source-processing pass.
-- [ ] Different partition sizes and executor counts preserve results.
-- [ ] Multiline/Unicode CSV records are not split, lost, duplicated, or counted as headers.
-- [ ] Repeated actions and changed inputs do not return stale answers.
-- [ ] Long runs stay bounded in queued inputs, retained data, and results.
-- [ ] show respects its limit without collecting the entire filtered dataset.
-- [ ] Stage-one cases still work; errors and shutdown remain understandable.
-- [ ] Their diagram explains the code and the behavior they demonstrated.
+The long _do function and weak names/docs make ownership hard to follow. Look for focused improvements to responsibilities, names, contracts, and explanation, while preserving working transport/error/lifecycle behavior. Do not demand a complete rewrite or a specific class hierarchy.
 
-Ask for application-level record/task instrumentation. The resource monitor
-cannot by itself prove how often CSV records were parsed. Do not accept only a
-final count or a faster timer reading as proof of lazy, one-pass execution.
+A correct application may avoid a particular faulty path. Do not force a poor scheduler just to trigger it; use a small reproduction during discussion. Judge diagnosis and a justified remedy. Ask what reproduces the defect, why the chosen layer owns the fix, and how they checked existing behavior afterward. Replacing Workframe with another engine misses the exercise's learning objective.
 
-Advance when correctness, lazy semantics, bounded resource use, and package
-understanding are demonstrated together. Discuss timing on the same machine,
-query, data, and budget, including preprocessing and cache conditions. Ask what
-was changed, why that layer owns it, and what tradeoff remains.
+## 4. Review workframe-internals.drawio
+
+This diagram explains the package, not the stage-one application. Ask for a real task trace with actual code locations:
+
+- [ ] Runtime/start, ExecutionOptions, and spawned executor processes.
+- [ ] submit or submit_task/TaskSpec, _do, JSON encoding, and input queues.
+- [ ] worker.work -> _pack -> loading.load -> the task's run(data).
+- [ ] Success/error encoding, result queue, receive, and TaskError propagation.
+- [ ] Outstanding/completed identities, retained data, ownership, and release.
+- [ ] close, sentinels, joins, and fallback termination.
+- [ ] ResourceMonitor/process_tree observation versus launcher/resources.Job enforcement/accounting.
+
+Review the code version actually used; repaired code may differ from the starter. Group helper modules where useful. Ask them to open code for an arrow in the diagram and explain both success and failure paths. A generic Spark picture is insufficient.
+
+## 5. Check scale/resources and decide
+
+Use the prepared large and uneven inputs, including a single file using multiple executors and a corpus larger than the assigned memory allowance. Observe pending work, buffers, retained results, and executor activity over a long run. Bounded task count alone does not prove bounded retained memory.
+
+Compare stage one and stage two on the same machine/input/query/budget, including startup, reading, partition preparation, execution, and shutdown. Record time, CPU, memory, task count, and idle activity. A small sample can get slower because of overhead; do not require an arbitrary speedup. The resource monitor cannot prove row-scan counts.
+
+**Ready:** correct results, independent lazy plans, one-pass evidence, bounded large/uneven execution, and an explainable package diagram/code trace. **Needs another review:** eager record scans, hidden preprocessing passes, unbounded queues/history/results, stale answers, or unexplained package behavior. Automated tests are optional; behavioral evidence and justified changes are required.
